@@ -4,12 +4,6 @@ import java.awt.Color;
 
 public class Tile 
 {
-	private boolean filled;		
-	public boolean getFilled() { return filled; }
-	
-	private Color color;		
-	public Color getColor() { return color; }
-	
 	public static final Color gray = new Color(220, 220, 225);
 	public static final Color lime = new Color(50, 205, 50);
 	public static final Color green = new Color(0, 128, 0);
@@ -19,10 +13,19 @@ public class Tile
 	public static final Color red = new Color(139, 0, 0);
 	public static final Color yellow = new Color(225, 225, 0);
 	
+	private boolean filled;		
+	public boolean getFilled() { return filled; }
+	public void setFilled(boolean filled) { this.filled = filled; } 
+	
+	private Color color;		
+	public Color getColor() { return color; }
+	public void setColor(Color color) { this.color = color; }
+	
 	public static final int size = 30;
 	public static final int tileOffset = 2;
 	public static final int edgeOffset = 15;
 	
+	//Constructor is used to easily generate empty tiles at the games instantiation.
 	public Tile()
 	{
 		this(false, gray);

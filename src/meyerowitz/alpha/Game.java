@@ -23,9 +23,7 @@ public class Game extends JPanel
 			for(int j = 0; j < 10; j ++)
 				tiles[i][j] = new Tile();
 		
-		
 		repaint();
-	
 	}
 	
 	@Override
@@ -46,7 +44,7 @@ public class Game extends JPanel
 		g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2D.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
 		int xOffset = offsetCoords(x);
-		int yOffset = offsetCoords(y) + 40;
+		int yOffset = offsetCoords(y) + 80;
 		g2D.setColor(tile.getColor());
 		g2D.fillRoundRect(xOffset, yOffset, Tile.size, Tile.size, 10, 10);
 		
@@ -62,7 +60,7 @@ public class Game extends JPanel
 		JFrame game = new JFrame();
 		game.setTitle("1010!");
 		game.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		game.setSize(355, 520);
+		game.setSize(355, 600);
 		game.setResizable(false);
 		game.add(new Game());
 		game.setLocationRelativeTo(null);
