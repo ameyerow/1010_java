@@ -11,17 +11,23 @@ import javax.swing.WindowConstants;
 
 public class Game extends JPanel
 {	
-	private static final long serialVersionUID = -6280861151097230288L;
+	private static final long serialVersionUID = 7L;
 	
-	Tile[][] tiles;
+	private Tile[][] board;
+	private Shape[] shapes;
 	
 	public Game()
 	{
-		tiles = new Tile[10][10];
+		board = new Tile[10][10];
 		
 		for(int i = 0; i < 10; i++)
 			for(int j = 0; j < 10; j ++)
-				tiles[i][j] = new Tile();
+				board[i][j] = new Tile();
+		
+		shapes = new Shape[3];
+		
+		for(int i = 0; i < 3; i++)
+			shapes[i] = new Shape();
 		
 		repaint();
 	}
@@ -33,9 +39,13 @@ public class Game extends JPanel
 		g.setColor(new Color(250, 250, 255));
 		g.fillRect(0, 0, this.getSize().width, this.getSize().height);
 		
-		for(int x = 0; x < 10; x++)
-			for(int y = 0; y < 10; y++)
-				paintTile(g, tiles[x][y], x, y);
+		for(int i = 0; i < 10; i++)
+			for(int j = 0; j < 10; j++)
+				paintTile(g, board[i][j], i, j);
+		
+		for(int i = 0; i < 3; i++)
+			if(shapes[i] != null)
+				paintShape(g, shapes[i], i);
 	}
 	
 	private void paintTile(Graphics g, Tile tile, int x, int y)
@@ -48,6 +58,27 @@ public class Game extends JPanel
 		g2D.setColor(tile.getColor());
 		g2D.fillRoundRect(xOffset, yOffset, tile.getSize(), tile.getSize(), 10, 10);
 		
+	}
+	
+	private void paintShape(Graphics g, Shape shape, int index)
+	{
+		Graphics2D g2D = (Graphics2D) g;
+		g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2D.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
+		Tile[][] tiles = shape.getTiles();
+		for(int i = 0; i < tiles.length; i++)
+		{
+			for(int j = 0; j < tiles.length; j++)
+			{
+				if(tiles[i][j] != null)
+				{
+					int xOffset = offsetCoords(i, tiles[i][j]) + (115 * index);
+					int yOffset = offsetCoords(j, tiles[i][j]) + 430;
+					g2D.setColor(tiles[i][j].getColor());
+					g2D.fillRoundRect(xOffset, yOffset, tiles[i][j].getSize(), tiles[i][j].getSize(), 8, 8);
+				}
+			}
+		}		
 	}
 	
 	private int offsetCoords(int arg, Tile tile)

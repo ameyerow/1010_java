@@ -4,7 +4,8 @@ import java.awt.Color;
 
 public class Shape 
 {
-	public Tile[][] tiles;
+	private Tile[][] tiles;
+	public Tile[][] getTiles() { return tiles; }
 	
 	// Once this empty constructor is called, a random tile is picked and created by 
 	// calling the Shape(int arg) constructor.
@@ -26,16 +27,16 @@ public class Shape
 			// 2*2 square
 			case 1:
 				tiles = new Tile[2][2];
-				for(int i = 0; i < 3; i++)
-					for(int j = 0; j < 3; j++)
+				for(int i = 0; i < 2; i++)
+					for(int j = 0; j < 2; j++)
 						tiles[i][j] = new Tile(Tile.lime);
 				break;
 				
 			// 3*3 square
 			case 2:
 				tiles = new Tile[3][3];
-				for(int i = 0; i < 4; i++)
-					for(int j = 0; j < 4; j++)
+				for(int i = 0; i < 3; i++)
+					for(int j = 0; j < 3; j++)
 						tiles[i][j] = new Tile(Tile.teal);
 				break;
 				
@@ -44,8 +45,8 @@ public class Shape
 			// four cases.
 			case 3: case 4: case 5: case 6:
 				tiles = new Tile[2][2];
-				for(int i = 0; i < 3; i++)
-					for(int j = 0; j < 3; j++)
+				for(int i = 0; i < 2; i++)
+					for(int j = 0; j < 2; j++)
 						tiles[i][j] = new Tile(Tile.green);
 				tiles[(int)(Math.random() * 2)][(int)(Math.random() * 2)] = null; // {0,1}
 				break;
@@ -54,8 +55,8 @@ public class Shape
 			// picked 2*2 square to be set to null.
 			case 7: case 8: case 9: case 10:
 				tiles = new Tile[3][3];
-				for(int i = 0; i < 4; i++)
-					for(int j = 0; j < 4; j++)
+				for(int i = 0; i < 3; i++)
+					for(int j = 0; j < 3; j++)
 						tiles[i][j] = new Tile(Tile.blue);
 				
 				int[] corners = { 0, 2 };
@@ -72,10 +73,7 @@ public class Shape
 			
 			//horizontal or vertical line, the length is randomly generated from 2 to 5. 
 			case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 18:
-				int length = (int)(Math.random()* (5-2) + 2); // {2,...,5}
-				int orientation = (int)(Math.random() * 2); // {0,1}
-				tiles = (orientation == 0) ? new Tile[length][1] : new Tile[1][length];
-				
+				int length = (int)(Math.random()* (6 - 2) + 2); // {2,...,5}
 				Color color = null;
 				switch(length)
 				{
@@ -91,15 +89,19 @@ public class Shape
 					case 5:
 						color = Tile.red;
 						break;
-				}
+				}		
 				
-				for(int i = 0; i < (length + 1); i++)
+				int orientation = (int)(Math.random() * 2); // {0,1}
+				tiles = new Tile[length][length];
+				
+				for(int i = 0; i < length; i++)
 				{
 					if(orientation == 0)
-						tiles[i][0] = new Tile(color);
+						tiles[i][Math.floorDiv(length - 1, 2)] = new Tile(color);
 					else
-						tiles[0][i] = new Tile(color);
+						tiles[Math.floorDiv(length - 1, 2)][i] = new Tile(color);
 				}
+				
 				break;
 		}
 	}

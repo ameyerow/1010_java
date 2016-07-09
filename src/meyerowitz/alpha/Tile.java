@@ -23,18 +23,17 @@ public class Tile
 	public Color getColor() { return color; }
 	public void setColor(Color color) { this.color = color; }
 	
-	private int size = 30;
+	private int size;
 	public int getSize() { return size; }
 	public void setSize(int size) { this.size = size; }
 	
-	private int tileOffset = 2;
+	private int tileOffset;
 	public int getTileOffset() { return tileOffset; }
 	public void setTileOffset(int tileOffset) { this.tileOffset = tileOffset; }
 	
-	private int edgeOffset = 15;
+	private int edgeOffset;
 	public int getEdgeOffset() { return edgeOffset; }
 	public void setEdgeOffset(int edgeOffset) { this.edgeOffset = edgeOffset; }
-	
 	
 	// Constructor is used to easily generate empty tiles at the games instantiation.
 	public Tile()
@@ -47,14 +46,17 @@ public class Tile
 	{
 		this.filled = filled;
 		this.color = color;
+		size = 30;
+		tileOffset = 2;
+		edgeOffset = 15;
 	}
 	
 	// Constructor for shape tiles
 	public Tile(Color color)
 	{
 		this.color = color;
-		size = 15;
+		size = 20;
 		tileOffset = 1;
-		edgeOffset = 0;
+		edgeOffset = 7;
 	}
 }
