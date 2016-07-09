@@ -10,15 +10,18 @@ public class Tile
 	private Color color;		
 	public Color getColor() { return color; }
 	
-	public static final Color gray = new Color(0, 0, 70);
-	public static final Color lime = new Color(100, 75, 75);
-	public static final Color green = new Color(150, 100, 75);
-	public static final Color blue = new Color(195, 100, 75);
-	public static final Color orange = new Color(35, 100, 80);
-	public static final Color pink = new Color(340, 80, 80);
-	public static final Color red = new Color(10, 90, 70);
-	public static final Color yellow = new Color(60, 90, 80);
-	public static final Color white = new Color(0, 0, 100);
+	public static final Color gray = new Color(220, 220, 225);
+	public static final Color lime = new Color(50, 205, 50);
+	public static final Color green = new Color(0, 128, 0);
+	public static final Color blue = new Color(65, 105, 225);
+	public static final Color orange = new Color(255, 69, 0);
+	public static final Color pink = new Color(220, 20, 60);
+	public static final Color red = new Color(139, 0, 0);
+	public static final Color yellow = new Color(225, 225, 0);
+	
+	public static final int size = 30;
+	public static final int tileOffset = 2;
+	public static final int edgeOffset = 15;
 	
 	public Tile()
 	{
