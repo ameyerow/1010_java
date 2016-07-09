@@ -43,16 +43,16 @@ public class Game extends JPanel
 		Graphics2D g2D = (Graphics2D) g;
 		g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2D.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
-		int xOffset = offsetCoords(x);
-		int yOffset = offsetCoords(y) + 80;
+		int xOffset = offsetCoords(x, tile);
+		int yOffset = offsetCoords(y, tile) + 80;
 		g2D.setColor(tile.getColor());
-		g2D.fillRoundRect(xOffset, yOffset, Tile.size, Tile.size, 10, 10);
+		g2D.fillRoundRect(xOffset, yOffset, tile.getSize(), tile.getSize(), 10, 10);
 		
 	}
 	
-	private int offsetCoords(int arg)
+	private int offsetCoords(int arg, Tile tile)
 	{
-		return arg * (Tile.size + Tile.tileOffset) + Tile.edgeOffset;
+		return arg * (tile.getSize() + tile.getTileOffset()) + tile.getEdgeOffset();
 	}
 	
 	public static void main(String[] args)

@@ -17,25 +17,44 @@ public class Tile
 	
 	private boolean filled;		
 	public boolean getFilled() { return filled; }
-	public void setFilled(boolean filled) { this.filled = filled; } 
+	public void setFilled(boolean filled) { this.filled = filled; }
 	
 	private Color color;		
 	public Color getColor() { return color; }
 	public void setColor(Color color) { this.color = color; }
 	
-	public static final int size = 30;
-	public static final int tileOffset = 2;
-	public static final int edgeOffset = 15;
+	private int size = 30;
+	public int getSize() { return size; }
+	public void setSize(int size) { this.size = size; }
 	
-	//  Constructor is used to easily generate empty tiles at the games instantiation.
+	private int tileOffset = 2;
+	public int getTileOffset() { return tileOffset; }
+	public void setTileOffset(int tileOffset) { this.tileOffset = tileOffset; }
+	
+	private int edgeOffset = 15;
+	public int getEdgeOffset() { return edgeOffset; }
+	public void setEdgeOffset(int edgeOffset) { this.edgeOffset = edgeOffset; }
+	
+	
+	// Constructor is used to easily generate empty tiles at the games instantiation.
 	public Tile()
 	{
 		this(false, gray);
 	}
 	
+	// Constructor for board tiles 
 	public Tile(boolean filled, Color color)
 	{
 		this.filled = filled;
 		this.color = color;
+	}
+	
+	// Constructor for shape tiles
+	public Tile(Color color)
+	{
+		this.color = color;
+		size = 15;
+		tileOffset = 1;
+		edgeOffset = 0;
 	}
 }
