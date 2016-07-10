@@ -1,2 +1,2 @@
 # Machine_Learning
-Trying to use different aspects of machine learning to solve games
+Trying to use aspects of machine learning to solve different games
