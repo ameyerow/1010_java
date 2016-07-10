@@ -1,20 +1,24 @@
 package meyerowitz.alpha;
 
 import java.awt.Color;
+import java.awt.Point;
+import java.awt.Rectangle;
 
 public class Shape 
 {
 	private Tile[][] tiles;
 	public Tile[][] getTiles() { return tiles; }
 	
-	// Once this empty constructor is called, a random tile is picked and created by 
+	private Rectangle[] hitbox;
+	
+	// Once this constructor is called, a random tile is picked and created by 
 	// calling the Shape(int arg) constructor.
-	public Shape() 
+	public Shape(int index) 
 	{
-		this((int)(Math.random() * 19)); // {0,...,18}
+		this((int)(Math.random() * 19), index); // {0,...,18}
 	}
 	
-	public Shape(int arg)
+	public Shape(int arg, int index)
 	{
 		switch(arg)
 		{
@@ -52,7 +56,7 @@ public class Shape
 				break;
 				
 			// 3*3 L, all four possible shapes are accounted for by setting a randomly 
-			// picked 2*2 square to be set to null.
+			// picked 2*2 square to null.
 			case 7: case 8: case 9: case 10:
 				tiles = new Tile[3][3];
 				for(int i = 0; i < 3; i++)
@@ -97,12 +101,73 @@ public class Shape
 				for(int i = 0; i < length; i++)
 				{
 					if(orientation == 0)
-						tiles[i][Math.floorDiv(length - 1, 2)] = new Tile(color);
+						tiles[i][0] = new Tile(color);
 					else
-						tiles[Math.floorDiv(length - 1, 2)][i] = new Tile(color);
+						tiles[0][i] = new Tile(color);
 				}
 				
 				break;
 		}
+		
+		//  creates a hitbox for the shape
+		int tileQuantity = 0;
+		for(int i = 0; i < tiles.length; i++)
+			for(int j = 0; j < tiles.length; j++)
+				if(tiles[i][j] != null)
+				{
+					tileQuantity++;
+				}
+		
+		hitbox = new Rectangle[tileQuantity];
+		int a = 0;
+		for(int i = 0; i < tiles.length; i++)
+			for(int j = 0; j < tiles.length; j++)
+				if(tiles[i][j] != null)
+				{
+					int xOffset = offsetCoords(i, tiles[i][j]) + (115 * index);
+					int yOffset = offsetCoords(j, tiles[i][j]) + 430;
+					hitbox[a] = new Rectangle(xOffset, yOffset, tiles[i][j].getSize() + 1, tiles[i][j].getSize() + 1);
+					a++;
+				}
+	}
+	
+	private int offsetCoords(int arg, Tile tile)
+	{
+		return arg * (tile.getSize() + tile.getTileOffset()) + tile.getEdgeOffset();
+	}
+	
+	public boolean contains(Point arg)
+	{
+		for(Rectangle rectangle: hitbox)
+		{
+			if(rectangle.contains(arg))
+				return true;
+		}
+		return false;
+	}
+	
+	private boolean lifted = false;
+	public boolean getLifted() { return lifted; }
+	public void setLifted(boolean lifted) 
+	{ 
+		this.lifted = lifted; 
+		
+		for(int i = 0; i < tiles.length; i++)
+			for(int j = 0; j < tiles.length; j++)
+				if(tiles[i][j] != null)
+				{
+					if(lifted == true)
+					{
+						tiles[i][j].setSize(27);
+						tiles[i][j].setTileOffset(5);
+						tiles[i][j].setEdgeOffset(0);
+					}
+					else
+					{
+						tiles[i][j].setSize(20);
+						tiles[i][j].setTileOffset(1);
+						tiles[i][j].setEdgeOffset(15);
+					}
+				}
 	}
 }

@@ -1,15 +1,12 @@
 package meyerowitz.alpha;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.concurrent.*;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 
-public class Game extends JPanel
+public class Game extends JPanel implements MouseListener
 {	
 	private static final long serialVersionUID = 7L;
 	
@@ -18,6 +15,7 @@ public class Game extends JPanel
 	
 	public Game()
 	{
+		addMouseListener(this);
 		board = new Tile[10][10];
 		
 		for(int i = 0; i < 10; i++)
@@ -27,9 +25,18 @@ public class Game extends JPanel
 		shapes = new Shape[3];
 		
 		for(int i = 0; i < 3; i++)
-			shapes[i] = new Shape();
+			shapes[i] = new Shape(i);
 		
-		repaint();
+		Runnable runnable = new Runnable()
+		{
+			@Override
+			public void run() 
+			{
+				repaint();	
+			}	
+		};
+		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+		executor.scheduleAtFixedRate(runnable, 0, 100, TimeUnit.MILLISECONDS);	
 	}
 	
 	@Override
@@ -45,7 +52,12 @@ public class Game extends JPanel
 		
 		for(int i = 0; i < 3; i++)
 			if(shapes[i] != null)
-				paintShape(g, shapes[i], i);
+			{
+				if(!shapes[i].getLifted())
+					paintShape(g, shapes[i], i);
+				else
+					paintLiftedShape(g, shapes[i]);
+			}
 	}
 	
 	private void paintTile(Graphics g, Tile tile, int x, int y)
@@ -56,8 +68,7 @@ public class Game extends JPanel
 		int xOffset = offsetCoords(x, tile);
 		int yOffset = offsetCoords(y, tile) + 80;
 		g2D.setColor(tile.getColor());
-		g2D.fillRoundRect(xOffset, yOffset, tile.getSize(), tile.getSize(), 10, 10);
-		
+		g2D.fillRoundRect(xOffset, yOffset, tile.getSize(), tile.getSize(), 10, 10);	
 	}
 	
 	private void paintShape(Graphics g, Shape shape, int index)
@@ -67,18 +78,31 @@ public class Game extends JPanel
 		g2D.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
 		Tile[][] tiles = shape.getTiles();
 		for(int i = 0; i < tiles.length; i++)
-		{
 			for(int j = 0; j < tiles.length; j++)
-			{
 				if(tiles[i][j] != null)
 				{
 					int xOffset = offsetCoords(i, tiles[i][j]) + (115 * index);
 					int yOffset = offsetCoords(j, tiles[i][j]) + 430;
 					g2D.setColor(tiles[i][j].getColor());
 					g2D.fillRoundRect(xOffset, yOffset, tiles[i][j].getSize(), tiles[i][j].getSize(), 8, 8);
-				}
-			}
-		}		
+				}			
+	}
+	
+	private void paintLiftedShape(Graphics g, Shape shape)
+	{
+		Graphics2D g2D = (Graphics2D) g;
+		g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2D.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
+		Tile[][] tiles = shape.getTiles();
+		for(int i = 0; i < tiles.length; i++)
+			for(int j = 0; j < tiles.length; j++)
+				if(tiles[i][j] != null)
+				{
+					int xOffset = (int) (offsetCoords(i, tiles[i][j]) + (MouseInfo.getPointerInfo().getLocation().getX()) - this.getLocationOnScreen().getX());
+					int yOffset = (int) (offsetCoords(j, tiles[i][j]) + (MouseInfo.getPointerInfo().getLocation().getY()) - this.getLocationOnScreen().getY());
+					g2D.setColor(tiles[i][j].getColor());
+					g2D.fillRoundRect(xOffset, yOffset, tiles[i][j].getSize(), tiles[i][j].getSize(), 10, 10);
+				}			
 	}
 	
 	private int offsetCoords(int arg, Tile tile)
@@ -96,5 +120,30 @@ public class Game extends JPanel
 		game.add(new Game());
 		game.setLocationRelativeTo(null);
 		game.setVisible(true); 
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {}
+	public void mouseEntered(MouseEvent e) {}
+	public void mouseExited(MouseEvent e) {}
+	
+	public void mousePressed(MouseEvent e) 
+	{
+		System.out.println("mouse pressed");
+		Point point = new Point(e.getX(), e.getY());
+		
+		for(Shape shape: shapes)
+			if(shape.contains(point))
+			{
+				shape.setLifted(true);	
+				System.out.println("lifted shape");
+			}
+	}
+
+	public void mouseReleased(MouseEvent e) 
+	{
+		for(Shape shape: shapes)
+			if(shape.getLifted())
+				shape.setLifted(false);
 	}
 }
