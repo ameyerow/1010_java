@@ -166,7 +166,7 @@ public class Shape
 					{
 						tiles[i][j].setSize(20);
 						tiles[i][j].setTileOffset(1);
-						tiles[i][j].setEdgeOffset(15);
+						tiles[i][j].setEdgeOffset(7);
 					}
 				}
 	}

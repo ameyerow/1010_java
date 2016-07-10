@@ -11,9 +11,9 @@ public class Tile
 	public static final Color orange = new Color(255, 69, 0);
 	public static final Color pink = new Color(220, 20, 60);
 	public static final Color red = new Color(139, 0, 0);
-	public static final Color yellow = new Color(225, 225, 0);
+	public static final Color yellow = new Color(255, 215, 0);
 	public static final Color purple = new Color(72, 61, 139);
-	public static final Color teal = new Color(98, 238, 214);
+	public static final Color teal = new Color(87, 176, 168);
 	
 	private boolean filled;		
 	public boolean getFilled() { return filled; }

@@ -36,7 +36,7 @@ public class Game extends JPanel implements MouseListener
 			}	
 		};
 		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-		executor.scheduleAtFixedRate(runnable, 0, 100, TimeUnit.MILLISECONDS);	
+		executor.scheduleAtFixedRate(runnable, 0, 33, TimeUnit.MILLISECONDS);	
 	}
 	
 	@Override
@@ -98,8 +98,10 @@ public class Game extends JPanel implements MouseListener
 			for(int j = 0; j < tiles.length; j++)
 				if(tiles[i][j] != null)
 				{
-					int xOffset = (int) (offsetCoords(i, tiles[i][j]) + (MouseInfo.getPointerInfo().getLocation().getX()) - this.getLocationOnScreen().getX());
-					int yOffset = (int) (offsetCoords(j, tiles[i][j]) + (MouseInfo.getPointerInfo().getLocation().getY()) - this.getLocationOnScreen().getY());
+					int xOffset = (int) (offsetCoords(i, tiles[i][j]) + 
+							(MouseInfo.getPointerInfo().getLocation().getX()) - this.getLocationOnScreen().getX()) - 5;
+					int yOffset = (int) (offsetCoords(j, tiles[i][j]) + 
+							(MouseInfo.getPointerInfo().getLocation().getY()) - this.getLocationOnScreen().getY()) - 5;
 					g2D.setColor(tiles[i][j].getColor());
 					g2D.fillRoundRect(xOffset, yOffset, tiles[i][j].getSize(), tiles[i][j].getSize(), 10, 10);
 				}			
