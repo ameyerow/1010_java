@@ -9,6 +9,9 @@ public class Shape
 	private Tile[][] tiles;
 	public Tile[][] getTiles() { return tiles; }
 	
+	private int value;
+	public int getValue() { return value; }
+	
 	private Rectangle[] hitbox;
 	
 	// Once this constructor is called, a random tile is picked and created by 
@@ -129,6 +132,9 @@ public class Shape
 					hitbox[a] = new Rectangle(xOffset, yOffset, tiles[i][j].getSize() + 1, tiles[i][j].getSize() + 1);
 					a++;
 				}
+		
+		// Sets the value of the shape to the number of tiles the shape contains
+		value = tileQuantity;
 	}
 	
 	private int offsetCoords(int arg, Tile tile)
