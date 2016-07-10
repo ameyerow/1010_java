@@ -75,7 +75,7 @@ public class Shape
 				tiles[x + xModifier][y + yModifier] = null;
 				break;
 			
-			//horizontal or vertical line, the length is randomly generated from 2 to 5. 
+			// horizontal or vertical line, the length is randomly generated from 2 to 5. 
 			case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 18:
 				int length = (int)(Math.random()* (6 - 2) + 2); // {2,...,5}
 				Color color = null;
@@ -109,7 +109,7 @@ public class Shape
 				break;
 		}
 		
-		//  creates a hitbox for the shape
+		// creates a hitbox for the shape
 		int tileQuantity = 0;
 		for(int i = 0; i < tiles.length; i++)
 			for(int j = 0; j < tiles.length; j++)

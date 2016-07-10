@@ -2,6 +2,7 @@ package meyerowitz.alpha;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
 import java.util.concurrent.*;
 import javax.swing.*;
 
@@ -22,7 +23,8 @@ public class Game extends JPanel implements MouseListener
 			for(int j = 0; j < 10; j ++)
 				board[i][j] = new Tile();
 		
-		// create hitbox for the board (one for every tile)
+		// create hitbox for the board; each tile has its respective hitbox with the 
+		// same index -- board[x][y] correlates to hitbox[x][y]
 		hitbox = new Rectangle[10][10];
 		for(int i = 0; i < 10; i++)
 			for(int j = 0; j < 10; j++)
@@ -121,18 +123,6 @@ public class Game extends JPanel implements MouseListener
 	{
 		return arg * (tile.getSize() + tile.getTileOffset()) + tile.getEdgeOffset();
 	}
-	
-	public static void main(String[] args)
-	{
-		JFrame game = new JFrame();
-		game.setTitle("1010!");
-		game.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		game.setSize(355, 600);
-		game.setResizable(false);
-		game.add(new Game());
-		game.setLocationRelativeTo(null);
-		game.setVisible(true); 
-	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {}
@@ -152,50 +142,48 @@ public class Game extends JPanel implements MouseListener
 
 	public void mouseReleased(MouseEvent e) 
 	{
+		// Checks to see if the lifted shape is placeable in the current location. If
+		// not, it returns to its original location and size.
 		Point point = new Point(e.getX(), e.getY());
-		for(int i = 0; i < 10; i++)
-			for(int j = 0; j < 10; j++)
-				if(hitbox[i][j].contains(point))
-				{
-					int index = 0;
-					for(int a = 0; a < 3; a++)
-						if(shapes[a] != null && shapes[a].getLifted())
-							index = a;
-					
-					boolean placeable = false;
-					for(int a = 0; a < shapes[index].getTiles().length; a++)
+		boolean arg = false;
+		for(Shape shape: shapes)
+			if(shape != null & !arg)
+				arg = shape.getLifted() ? true : false;
+		if(arg)
+			for(int i = 0; i < 10; i++)
+				for(int j = 0; j < 10; j++)
+					if(hitbox[i][j].contains(point))
 					{
-						for(int b = 0; b < shapes[index].getTiles().length; b++)
-						{
-							if(shapes[index].getTiles()[a][b] != null & ((i + a) < 10 & (j + b) < 10))
-							{
-								placeable = board[i + a][j + b].getFilled() ? false : true;
-								if(!placeable)
-									break;
-							}
-							
-						}
-						if(!placeable)
-							break;
-					}
-					
-					if(placeable)
-					{
+						int index = 0;
+						for(int a = 0; a < 3; a++)
+							if(shapes[a] != null && shapes[a].getLifted())
+								index = a;
+						
+						boolean placeable = true;
 						for(int a = 0; a < shapes[index].getTiles().length; a++)
 							for(int b = 0; b < shapes[index].getTiles().length; b++)
-								if(shapes[index].getTiles()[a][b] != null)
-								{
-									board[i + a][j + b].setColor(shapes[index].getTiles()[a][b].getColor());
-									board[i + a][j + b].setFilled(true);
-								}
-						shapes[index] = null;
-					}
-				}
+								if(placeable)
+									if(shapes[index].getTiles()[a][b] != null & ((i + a) < 10 & (j + b) < 10))
+										placeable = board[i + a][j + b].getFilled() ? false : true;
+									
+						if(placeable)
+						{
+							for(int a = 0; a < shapes[index].getTiles().length; a++)
+								for(int b = 0; b < shapes[index].getTiles().length; b++)
+									if(shapes[index].getTiles()[a][b] != null)
+									{
+										board[i + a][j + b].setColor(shapes[index].getTiles()[a][b].getColor());
+										board[i + a][j + b].setFilled(true);
+									}
+							shapes[index] = null;
+						}
+					}	
 		
 		for(Shape shape: shapes)
 			if(shape != null && shape.getLifted())
 				shape.setLifted(false);
 		
+		// Generates new shapes if all shapes are null -- if there are no remaining shapes
 		boolean noShapes = true;
 		for(Shape shape: shapes)
 			if(shape != null)
@@ -203,5 +191,52 @@ public class Game extends JPanel implements MouseListener
 		if(noShapes)
 			for(int i = 0; i < 3; i++)
 				shapes[i] = new Shape(i);
+		
+		ArrayList<Tile> tiles = new ArrayList<Tile>();
+		// Checks every column to see if one is full and stores the tiles to be set to empty
+		// after the rows are checked. They need to be kept full in case both a row and column
+		// with overlaping tiles are both full.
+		for(int i = 0; i < 10; i++)
+			for(int j = 0; j < 10; j++)
+			{
+				if(board[i][j].getFilled())
+				{
+					if(j == 9)
+						for(int a = 0; a < 10; a++)
+							tiles.add(board[i][a]);
+				}
+				else { break; }
+			}
+		// Checks every row to see if one is full and stores the tiles to be set to empty.
+		for(int i = 0; i < 10; i++)
+			for(int j = 0; j < 10; j++)
+			{
+				if(board[j][i].getFilled())
+				{
+					if(j == 9)
+						for(int a = 0; a < 10; a++)
+							tiles.add(board[a][i]);
+				}
+				else { break; }
+			}
+		// Removes every full row and column.
+		for(Tile tile: tiles)
+		{
+			tile.setColor(Tile.gray);
+			tile.setFilled(false);
 		}
+	}
+	
+	public static void main(String[] args)
+	{
+		JFrame game = new JFrame();
+		game.setTitle("1010!");
+		game.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		game.setSize(355, 600);
+		game.setResizable(false);
+		game.add(new Game());
+		game.setLocationRelativeTo(null);
+		game.setVisible(true); 
+	}
+
 }
