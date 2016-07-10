@@ -164,9 +164,20 @@ public class Game extends JPanel implements MouseListener
 					
 					boolean placeable = false;
 					for(int a = 0; a < shapes[index].getTiles().length; a++)
+					{
 						for(int b = 0; b < shapes[index].getTiles().length; b++)
+						{
 							if(shapes[index].getTiles()[a][b] != null & ((i + a) < 10 & (j + b) < 10))
+							{
 								placeable = board[i + a][j + b].getFilled() ? false : true;
+								if(!placeable)
+									break;
+							}
+							
+						}
+						if(!placeable)
+							break;
+					}
 					
 					if(placeable)
 					{
