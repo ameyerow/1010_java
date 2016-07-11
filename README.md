@@ -1,2 +1,2 @@
-# Machine_Learning
-Trying to use aspects of machine learning to solve different games
+# 1010_java
+The popular 10!10! app created in java
