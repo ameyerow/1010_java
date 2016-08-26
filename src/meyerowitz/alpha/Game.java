@@ -10,6 +10,7 @@ public class Game extends JPanel implements MouseListener
 {	
 	private static final long serialVersionUID = 7L;
 	
+	private Solver solver;
 	private Tile[][] board;
 	private Shape[] shapes;
 	private Rectangle[][] hitbox;
@@ -43,6 +44,9 @@ public class Game extends JPanel implements MouseListener
 		for(int i = 0; i < 3; i++)
 			shapes[i] = new Shape(i);
 		
+		// Create Solver and give it the shapes
+		
+		
 		Runnable runnable = new Runnable()
 		{
 			@Override
@@ -57,7 +61,7 @@ public class Game extends JPanel implements MouseListener
 	
 	private boolean checkAnyPlaceable()
 	{
-		// Goes through each shapes and checks if they can be placed in any position in the entire
+		// Goes through each shape and checks if they can be placed in any position in the entire
 		// board. If this is not possible for any shape in any position it returns false.
 		for(Shape shape: shapes)
 		{
@@ -97,6 +101,13 @@ public class Game extends JPanel implements MouseListener
 		g.setFont(new Font("Abadi MT Condensed Light", Font.PLAIN, 50));
 		g.setColor(Tile.blue);
 		g.drawString(Integer.toString(score), (this.getSize().width/2) - (14 * length), 80);
+		
+		/*Graphics2D g2D = (Graphics2D) g;
+		g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2D.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
+		g2D.setColor(Tile.lime);
+		g2D.fillRoundRect(300, 10, 30, 30, 10, 10);
+		*/
 		
 		for(int i = 0; i < 10; i++)
 			for(int j = 0; j < 10; j++)
