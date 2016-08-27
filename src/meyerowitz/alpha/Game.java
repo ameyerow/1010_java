@@ -45,7 +45,7 @@ public class Game extends JPanel implements MouseListener
 			shapes[i] = new Shape(i);
 		
 		// Create Solver and give it the shapes
-		
+		solver = new Solver(shapes, shapes); //INCORRECT: have to find a way to get a Shape[] of every possible shape
 		
 		Runnable runnable = new Runnable()
 		{
@@ -269,7 +269,7 @@ public class Game extends JPanel implements MouseListener
 			boolean arg = false;
 			for(Shape shape: shapes)
 				if(shape != null & !arg)
-					arg = shape.getLifted() ? true : false;
+					arg = shape.getLifted();
 			if(arg)
 				for(int i = 0; i < 10; i++)
 					for(int j = 0; j < 10; j++)
