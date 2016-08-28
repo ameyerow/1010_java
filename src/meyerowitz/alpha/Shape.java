@@ -14,6 +14,31 @@ public class Shape
 	
 	private Rectangle[] hitbox;
 	
+	private boolean lifted = false;
+	public boolean getLifted() { return lifted; }
+	public void setLifted(boolean lifted) 
+	{ 
+		this.lifted = lifted; 
+		
+		for(int i = 0; i < tiles.length; i++)
+			for(int j = 0; j < tiles.length; j++)
+				if(tiles[i][j] != null)
+				{
+					if(lifted == true)
+					{
+						tiles[i][j].setSize(27);
+						tiles[i][j].setTileOffset(5);
+						tiles[i][j].setEdgeOffset(0);
+					}
+					else
+					{
+						tiles[i][j].setSize(20);
+						tiles[i][j].setTileOffset(1);
+						tiles[i][j].setEdgeOffset(7);
+					}
+				}
+	}
+	
 	// Once this constructor is called, a random tile is picked and created by 
 	// calling the Shape(int arg) constructor.
 	public Shape(int index) 
@@ -142,6 +167,80 @@ public class Shape
 		return arg * (tile.getSize() + tile.getTileOffset()) + tile.getEdgeOffset();
 	}
 	
+	public Shape(Tile[][] tiles) { this.tiles = tiles; }
+	
+	public static Shape[] getShapes()
+	{
+		Shape[] shapes = new Shape[19];
+		Tile[][] tiles;
+		int index = 0;
+		
+		// Adds all the squares and gets up to Shape[2]
+		for(int i = 0; i < 3; i++)
+		{
+			shapes[index++] = new Shape(i, 0);
+		}
+		
+		// Adds all the small L-shape and gets up to Shape[6] 
+		for(int i = 0; i < 2; i++)
+			for(int j = 0; j < 2; j++)
+			{
+				tiles = new Tile[2][2];
+				for(int k = 0; k < 2; k++)
+					for(int l = 0; l < 2; l++)
+						tiles[k][l] = new Tile(null);	
+				
+				tiles[i][j] = null;
+				shapes[index++] = new Shape(tiles);
+				tiles = null;
+			}
+		
+		// Adds all the big L-shape and gets up to Shape[10]
+		for(int i = 0; i < 2; i++)
+			for(int j = 0; j < 2; j++)
+			{
+				tiles = new Tile[3][3];
+				for(int k = 0; k < 3; k++)
+					for(int l = 0; l < 3; l++)
+						tiles[k][l] = new Tile(null);
+				
+				int[] corners = { 0, 2 };
+				int x = corners[i]; 
+				int y = corners[j];
+				int xModifier = (x == 0) ? 1 : -1;
+				int yModifier = (y == 0) ? 1 : -1;
+				
+				tiles[x][y] = null;
+				tiles[x + xModifier][y] = null;
+				tiles[x][y + yModifier] = null;
+				tiles[x + xModifier][y + yModifier] = null;
+				
+				shapes[index++] = new Shape(tiles);
+				
+				tiles = null;
+			}
+		
+		//Adds all the horizontal and vertical lines and gets up to Shape[18]
+		for(int i = 2; i < 6; i++)
+			for(int j = 0; j < 2; j++)
+			{	
+				tiles = new Tile[i][i];
+				
+				for(int k = 0; k < i; k++)
+				{
+					if(j == 0)
+						tiles[k][0] = new Tile(null);
+					else
+						tiles[0][k] = new Tile(null);
+				}
+				
+				shapes[index++] = new Shape(tiles);
+				tiles = null;
+			}
+				
+		return shapes;
+	}
+	
 	public boolean contains(Point arg)
 	{
 		for(Rectangle rectangle: hitbox)
@@ -150,30 +249,5 @@ public class Shape
 				return true;
 		}
 		return false;
-	}
-	
-	private boolean lifted = false;
-	public boolean getLifted() { return lifted; }
-	public void setLifted(boolean lifted) 
-	{ 
-		this.lifted = lifted; 
-		
-		for(int i = 0; i < tiles.length; i++)
-			for(int j = 0; j < tiles.length; j++)
-				if(tiles[i][j] != null)
-				{
-					if(lifted == true)
-					{
-						tiles[i][j].setSize(27);
-						tiles[i][j].setTileOffset(5);
-						tiles[i][j].setEdgeOffset(0);
-					}
-					else
-					{
-						tiles[i][j].setSize(20);
-						tiles[i][j].setTileOffset(1);
-						tiles[i][j].setEdgeOffset(7);
-					}
-				}
 	}
 }

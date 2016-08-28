@@ -41,7 +41,7 @@ public class Solver
 				
 				for(int i = 0; i < length; i++)
 					for(int j = 0; j < length; j++)
-							shape[i][j] = (tileShape.getTiles()[i][j] != null) ? 1 : 0;
+						shape[i][j] = (tileShape.getTiles()[i][j] != null) ? 1 : 0;
 				
 				shapes.add(shape);
 			}
