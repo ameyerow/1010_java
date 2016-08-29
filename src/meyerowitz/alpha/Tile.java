@@ -15,25 +15,25 @@ public class Tile
 	public static final Color purple = new Color(72, 61, 139);
 	public static final Color teal = new Color(87, 176, 168);
 	
-	private boolean filled;		
-	public boolean getFilled() { return filled; }
-	public void setFilled(boolean filled) { this.filled = filled; }
+	private boolean mFilled;		
+	public boolean getFilled() { return mFilled; }
+	public void setFilled(boolean filled) { mFilled = filled; }
 	
-	private Color color;		
-	public Color getColor() { return color; }
-	public void setColor(Color color) { this.color = color; }
+	private Color mColor;		
+	public Color getColor() { return mColor; }
+	public void setColor(Color color) { mColor = color; }
 	
-	private int size;
-	public int getSize() { return size; }
-	public void setSize(int size) { this.size = size; }
+	private int mSize;
+	public int getSize() { return mSize; }
+	public void setSize(int size) { mSize = size; }
 	
-	private int tileOffset;
-	public int getTileOffset() { return tileOffset; }
-	public void setTileOffset(int tileOffset) { this.tileOffset = tileOffset; }
+	private int mTileOffset;
+	public int getTileOffset() { return mTileOffset; }
+	public void setTileOffset(int tileOffset) { mTileOffset = tileOffset; }
 	
-	private int edgeOffset;
-	public int getEdgeOffset() { return edgeOffset; }
-	public void setEdgeOffset(int edgeOffset) { this.edgeOffset = edgeOffset; }
+	private int mEdgeOffset;
+	public int getEdgeOffset() { return mEdgeOffset; }
+	public void setEdgeOffset(int edgeOffset) { mEdgeOffset = edgeOffset; }
 	
 	// Constructor is used to easily generate empty tiles at the games instantiation.
 	public Tile()
@@ -44,19 +44,19 @@ public class Tile
 	// Constructor for board tiles 
 	public Tile(boolean filled, Color color)
 	{
-		this.filled = filled;
-		this.color = color;
-		size = 30;
-		tileOffset = 2;
-		edgeOffset = 15;
+		this.mFilled = filled;
+		this.mColor = color;
+		mSize = 30;
+		mTileOffset = 2;
+		mEdgeOffset = 15;
 	}
 	
 	// Constructor for shape tiles
 	public Tile(Color color)
 	{
-		this.color = color;
-		size = 20;
-		tileOffset = 1;
-		edgeOffset = 7;
+		this.mColor = color;
+		mSize = 20;
+		mTileOffset = 1;
+		mEdgeOffset = 7;
 	}
 }
