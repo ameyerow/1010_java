@@ -134,26 +134,85 @@ public class Solver
 		for(int[] i: arg)
 			board[ i[0] ][ i[1] ] = 0;
 		
-		
 		return board;
 	}
 	
 	private int calculateHeuristic(int[][] board)
 	{
-		int a = calculateGroupingFilled(board) 
-				+ calculateGroupingEmpty(board) 
-				- calculateShapesNotPlaceable(board);
-		
-		return a;
+		return calculateGroupingFilled(board) 
+			 + calculateGroupingEmpty(board) 
+			 - calculateShapesNotPlaceable(board);
 	}
 	
 	private int calculateGroupingFilled(int[][] board)
 	{
+		ArrayList<int[]> cachedTiles = new ArrayList<int[]>();
+		int[] temp = {-1, -1};
+		cachedTiles.add(temp);
+		
+		for(int i = 0; i < 10; i++)
+			for(int j = 0; j < 10; j++)
+				if(board[i][j] == 1)
+				{
+					boolean cached = false;
+					
+					for(int[] a: cachedTiles)
+						if(i == a[0] && j == a[1])
+							cached = true;
+							
+					if(!cached)
+					{
+						int[] coords = {i, j};
+						cachedTiles.add(coords);
+						
+						boolean connected = false;
+						
+						right: if(i + 1 < 10 && board[i + 1][j] == 1)
+						{
+							for(int[] a: cachedTiles)
+								if(i + 1 == a[0] && j == a[1])
+									break right;
+							int[] arg = {i + 1, j};
+							cachedTiles.add(arg);
+							connected = true;
+							
+						}
+						left: if(i - 1 > -1 && board[i - 1][j] == 1)
+						{
+							for(int[] a: cachedTiles)
+								if(i - 1 == a[0] && j == a[1] )
+									break left;
+							int[] arg = {i - 1, j};
+							cachedTiles.add(arg);
+							connected = true;
+						}
+						down: if(j + 1 < 10 && board[i][j + 1] == 1)
+						{
+							for(int[] a: cachedTiles)
+								if(i == a[0] && j + 1 == a[1] )
+									break down;
+							int[] arg = {i, j + 1};
+							cachedTiles.add(arg);
+							connected = true;
+						}
+						up: if(j - 1 > -1 && board[i][j - 1] == 1)
+						{
+							for(int[] a: cachedTiles)
+								if(i == a[0] && j - 1 == a[1] )
+									break up;
+							int[] arg = {i, j - 1};
+							cachedTiles.add(arg);
+							connected = true;
+						}
+					}
+				}
 		return 0;
 	}
 	
 	private int calculateGroupingEmpty(int[][] board)
 	{
+		
+		
 		return 0;
 	}
 	
