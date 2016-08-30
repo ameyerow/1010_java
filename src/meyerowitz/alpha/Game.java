@@ -15,12 +15,16 @@ public class Game extends JPanel implements MouseListener
 	private Rectangle[][] mHitbox;
 	private int mScore;
 	private boolean mGameOver;
+	private Color mSolverColor;
+	private boolean mSolverActivated;
 	
 	public Game()
 	{
 		addMouseListener(this);
 		mScore = 0;
 		mGameOver = false;
+		mSolverActivated = false;
+		mSolverColor = new Color(105, 105, 105); 
 		mBoard = new Tile[10][10];
 		
 		for(int i = 0; i < 10; i++)
@@ -42,10 +46,6 @@ public class Game extends JPanel implements MouseListener
 		
 		for(int i = 0; i < 3; i++)
 			mShapes[i] = new Shape(i);
-		
-		// Create Solver
-		Solver solver = new Solver(mBoard, mShapes);
-		solver.findBestMoves();
 		
 		Runnable runnable = new Runnable()
 		{
@@ -97,10 +97,15 @@ public class Game extends JPanel implements MouseListener
 		super.paint(g);
 		g.setColor(new Color(250, 250, 255));
 		g.fillRect(0, 0, this.getSize().width, this.getSize().height);
+		Graphics2D g2D = (Graphics2D) g;
+		g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2D.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
 		int length = Integer.toString(mScore).length();
-		g.setFont(new Font("Abadi MT Condensed Light", Font.PLAIN, 50));
-		g.setColor(Tile.blue);
-		g.drawString(Integer.toString(mScore), (this.getSize().width/2) - (14 * length), 80);
+		g2D.setFont(new Font("Abadi MT Condensed Light", Font.PLAIN, 50));
+		g2D.setColor(Tile.blue);
+		g2D.drawString(Integer.toString(mScore), (this.getSize().width/2) - (14 * length), 80);
+		
+		paintSolverButton(g);
 		
 		for(int i = 0; i < 10; i++)
 			for(int j = 0; j < 10; j++)
@@ -117,6 +122,16 @@ public class Game extends JPanel implements MouseListener
 		
 		if(mGameOver)
 			paintRestartButton(g);
+	}
+	
+	private void paintSolverButton(Graphics g)
+	{
+		Graphics2D g2D = (Graphics2D) g;
+		g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2D.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
+		g2D.setColor(mSolverColor);
+		g2D.fillRoundRect(322, 27, 10, 25, 10, 10);
+		g2D.fillOval(322, 15, 10, 10);
 	}
 	
 	private void paintTile(Graphics g, Tile tile, int x, int y)
@@ -202,9 +217,100 @@ public class Game extends JPanel implements MouseListener
 	
 	public void mouseClicked(MouseEvent e) 
 	{
-		if(mGameOver)
+		Point point = new Point(e.getX(), e.getY());
+		if(!mGameOver)
 		{
-			Point point = new Point(e.getX(), e.getY());
+			Rectangle solverHitbox = new Rectangle(322, 15, 10, 37);
+			if(solverHitbox.contains(point))
+			{
+				Runnable runnable = new Runnable()
+				{
+					@Override
+					public void run() 
+					{
+						while(mSolverActivated)
+						{
+							Solver solver = new Solver(mBoard, mShapes);
+							ArrayList<int[]> moves = solver.findBestMoves();
+							
+							for(int[] move : moves)
+							{
+								for(int a = 0; a < mShapes[move[0]].getTiles().length; a++)
+									for(int b = 0; b < mShapes[move[0]].getTiles().length; b++)
+										if(mShapes[move[0]].getTiles()[a][b] != null)
+										{
+											mBoard[move[1] + a][move[2] + b].setColor(mShapes[move[0]].getTiles()[a][b].getColor());
+											mBoard[move[1] + a][move[2] + b].setFilled(true);
+										}
+								mScore += mShapes[move[0]].getValue();
+								mShapes[move[0]] = null;
+							}
+							
+							ArrayList<Tile> tiles = new ArrayList<Tile>();
+							// Checks every column to see if one is full and stores the tiles to be set to empty
+							// after the rows are checked. They need to be kept full in case both a row and column
+							// with overlaping tiles are both full.
+							for(int i = 0; i < 10; i++)
+								for(int j = 0; j < 10; j++)
+								{
+									if(mBoard[i][j].getFilled())
+									{
+										if(j == 9)
+											for(int a = 0; a < 10; a++)
+												tiles.add(mBoard[i][a]);
+									}
+									else { break; }
+								}
+							// Checks every row to see if one is full and stores the tiles to be set to empty.
+							for(int i = 0; i < 10; i++)
+								for(int j = 0; j < 10; j++)
+								{
+									if(mBoard[j][i].getFilled())
+									{
+										if(j == 9)
+											for(int a = 0; a < 10; a++)
+												tiles.add(mBoard[a][i]);
+									}
+									else { break; }
+								}
+							// Removes every full row and column.
+							for(Tile tile: tiles)
+							{
+								if(tile.getFilled())
+									mScore++;
+								tile.setColor(Tile.gray);
+								tile.setFilled(false);
+							}
+							
+							for(int i = 0; i < 3; i++)
+								mShapes[i] = new Shape(i);
+							
+							if(!checkAnyPlaceable())
+							{
+								mGameOver = true;
+								mSolverActivated = false;
+							}
+						}
+					}
+				};
+				Thread thread = new Thread(runnable);
+				
+				if(!mSolverActivated)
+				{
+					mSolverColor = new Color(113, 219, 212);
+					mSolverActivated = true;
+					
+					thread.start();
+				}
+				else 
+				{
+					mSolverColor = new Color(105, 105, 105);
+					mSolverActivated = false;
+				}
+			}
+		}
+		else 
+		{
 			Rectangle restartHitbox = new Rectangle(100, 175, 150, 150);
 			if(restartHitbox.contains(point))
 			{
@@ -216,6 +322,8 @@ public class Game extends JPanel implements MouseListener
 				mScore = 0;
 				mGameOver = false;
 				mBoard = new Tile[10][10];
+				mSolverColor = new Color(105, 105, 105);
+				mSolverActivated = false;
 				
 				for(int i = 0; i < 10; i++)
 					for(int j = 0; j < 10; j ++)
@@ -340,16 +448,15 @@ public class Game extends JPanel implements MouseListener
 			}
 			
 			// Generates new shapes if all shapes are null -- if there are no remaining shapes
-						boolean noShapes = true;
-						for(Shape shape: mShapes)
-							if(shape != null)
-								noShapes = false;
-						if(noShapes)
-						{
-							for(int i = 0; i < 3; i++)
-								mShapes[i] = new Shape(i);
-	
-						}		
+			boolean noShapes = true;
+				for(Shape shape: mShapes)
+					if(shape != null)
+						noShapes = false;
+				if(noShapes)
+					for(int i = 0; i < 3; i++)
+						mShapes[i] = new Shape(i);
+							
+								
 			
 			// Ends the game if you can't place any tiles
 			if(!checkAnyPlaceable())
