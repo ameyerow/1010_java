@@ -154,7 +154,8 @@ public class Shape
 				{
 					int xOffset = offsetCoords(i, mTiles[i][j]) + (115 * index);
 					int yOffset = offsetCoords(j, mTiles[i][j]) + 430;
-					mHitbox[a] = new Rectangle(xOffset, yOffset, mTiles[i][j].getSize() + 1, mTiles[i][j].getSize() + 1);
+					mHitbox[a] = new Rectangle(
+							xOffset, yOffset, mTiles[i][j].getSize() + 1, mTiles[i][j].getSize() + 1);
 					a++;
 				}
 		

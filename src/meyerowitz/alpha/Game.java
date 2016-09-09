@@ -91,6 +91,45 @@ public class Game extends JPanel implements MouseListener
 		return false;
 	}
 	
+	private void removeFullRowsAndColumns()
+	{
+		ArrayList<Tile> tiles = new ArrayList<Tile>();
+		// Checks every column to see if one is full and stores the tiles to be set to empty
+		// after the rows are checked. They need to be kept full in case both a row and column
+		// with overlaping tiles are both full.
+		for(int i = 0; i < 10; i++)
+			for(int j = 0; j < 10; j++)
+			{
+				if(mBoard[i][j].getFilled())
+				{
+					if(j == 9)
+						for(int a = 0; a < 10; a++)
+							tiles.add(mBoard[i][a]);
+				}
+				else { break; }
+			}
+		// Checks every row to see if one is full and stores the tiles to be set to empty.
+		for(int i = 0; i < 10; i++)
+			for(int j = 0; j < 10; j++)
+			{
+				if(mBoard[j][i].getFilled())
+				{
+					if(j == 9)
+						for(int a = 0; a < 10; a++)
+							tiles.add(mBoard[a][i]);
+				}
+				else { break; }
+			}
+		// Removes every full row and column.
+		for(Tile tile: tiles)
+		{
+			if(tile.getFilled())
+				mScore++;
+			tile.setColor(Tile.gray);
+			tile.setFilled(false);
+		}
+	}
+	
 	@Override
 	public void paint(Graphics g)
 	{
@@ -228,10 +267,20 @@ public class Game extends JPanel implements MouseListener
 					@Override
 					public void run() 
 					{
-						while(mSolverActivated)
+						arg: while(mSolverActivated)
 						{
+							// A solver is generated with the board and the current shapes. It uses these 
+							// to find the "best moves" which it transmits as a int[][]
 							Solver solver = new Solver(mBoard, mShapes);
 							ArrayList<int[]> moves = solver.findBestMoves();
+							
+							if(moves == null)
+							{
+								mGameOver = true;
+								mSolverActivated = false;
+								mSolverColor = new Color(105, 105, 105);
+								break arg;
+							}
 							
 							for(int[] move : moves)
 							{
@@ -246,41 +295,7 @@ public class Game extends JPanel implements MouseListener
 								mShapes[move[0]] = null;
 							}
 							
-							ArrayList<Tile> tiles = new ArrayList<Tile>();
-							// Checks every column to see if one is full and stores the tiles to be set to empty
-							// after the rows are checked. They need to be kept full in case both a row and column
-							// with overlaping tiles are both full.
-							for(int i = 0; i < 10; i++)
-								for(int j = 0; j < 10; j++)
-								{
-									if(mBoard[i][j].getFilled())
-									{
-										if(j == 9)
-											for(int a = 0; a < 10; a++)
-												tiles.add(mBoard[i][a]);
-									}
-									else { break; }
-								}
-							// Checks every row to see if one is full and stores the tiles to be set to empty.
-							for(int i = 0; i < 10; i++)
-								for(int j = 0; j < 10; j++)
-								{
-									if(mBoard[j][i].getFilled())
-									{
-										if(j == 9)
-											for(int a = 0; a < 10; a++)
-												tiles.add(mBoard[a][i]);
-									}
-									else { break; }
-								}
-							// Removes every full row and column.
-							for(Tile tile: tiles)
-							{
-								if(tile.getFilled())
-									mScore++;
-								tile.setColor(Tile.gray);
-								tile.setFilled(false);
-							}
+							removeFullRowsAndColumns();
 							
 							for(int i = 0; i < 3; i++)
 								mShapes[i] = new Shape(i);
@@ -411,41 +426,7 @@ public class Game extends JPanel implements MouseListener
 				if(shape != null && shape.getLifted())
 					shape.setLifted(false);
 				
-			ArrayList<Tile> tiles = new ArrayList<Tile>();
-			// Checks every column to see if one is full and stores the tiles to be set to empty
-			// after the rows are checked. They need to be kept full in case both a row and column
-			// with overlaping tiles are both full.
-			for(int i = 0; i < 10; i++)
-				for(int j = 0; j < 10; j++)
-				{
-					if(mBoard[i][j].getFilled())
-					{
-						if(j == 9)
-							for(int a = 0; a < 10; a++)
-								tiles.add(mBoard[i][a]);
-					}
-					else { break; }
-				}
-			// Checks every row to see if one is full and stores the tiles to be set to empty.
-			for(int i = 0; i < 10; i++)
-				for(int j = 0; j < 10; j++)
-				{
-					if(mBoard[j][i].getFilled())
-					{
-						if(j == 9)
-							for(int a = 0; a < 10; a++)
-								tiles.add(mBoard[a][i]);
-					}
-					else { break; }
-				}
-			// Removes every full row and column.
-			for(Tile tile: tiles)
-			{
-				if(tile.getFilled())
-					mScore++;
-				tile.setColor(Tile.gray);
-				tile.setFilled(false);
-			}
+			removeFullRowsAndColumns();
 			
 			// Generates new shapes if all shapes are null -- if there are no remaining shapes
 			boolean noShapes = true;
@@ -455,8 +436,7 @@ public class Game extends JPanel implements MouseListener
 				if(noShapes)
 					for(int i = 0; i < 3; i++)
 						mShapes[i] = new Shape(i);
-							
-								
+										
 			
 			// Ends the game if you can't place any tiles
 			if(!checkAnyPlaceable())

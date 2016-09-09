@@ -17,9 +17,6 @@ public class Solver
 		SHAPES = convertShapesToArrayList(Shape.getShapes());
 		mBoard = convertBoardToIntArray(board);
 		mShapes = convertShapesToArrayList(shapes);
-		
-		printShapeArray(mShapes);
-		printBoardArray(mBoard);
 	}
 	
 	public ArrayList<int[]> findBestMoves()
@@ -31,11 +28,17 @@ public class Solver
 		// pushed to the front.
 		Collections.sort(mShapes);
 		
+		if(!checkShapePlaceableAnywhere(mBoard, mShapes.get(0)))
+			Collections.reverse(mShapes);
+		
 		for(InternalShape shape: mShapes)
 		{
 			// First number is the heuristic value of the current board and the next two numbers are
 			// the x and y coordinates where the shape should be placed
 			int[] bestBoard = {Integer.MAX_VALUE, 0, 0};
+			
+			if(!checkShapePlaceableAnywhere(boardClone, shape))
+				return null;
 			
 			for(int x = 0; x < 10; x++)
 			{
@@ -68,6 +71,33 @@ public class Solver
 		//printBoardArray(boardClone);
 		
 		return bestMoves;
+	}
+	
+	private boolean checkShapePlaceableAnywhere(int[][] board, InternalShape shape)
+	{
+		for(int i = 0; i < 10; i++)
+			for(int j = 0; j < 10; j++)
+			{				
+				boolean placeable = true;
+				for(int a = 0; a < shape.getTiles().length; a++)
+				{
+					for(int b = 0; b < shape.getTiles().length; b++)
+					{
+						if(placeable)
+							if(shape.getTiles()[a][b] == 1)
+							{
+								if((i + a) < 10 & (j + b) < 10)
+									placeable = board[i + a][j + b] == 1 ? false : true;
+								else
+									placeable = false;
+							}
+					}
+				}
+				if(placeable)
+					return true;
+			}
+		
+		return false;
 	}
 	
 	private boolean checkShapePlaceable(int[][] board, InternalShape shape, int x, int y)
@@ -144,14 +174,14 @@ public class Solver
 	private int calculateHeuristic(int[][] board)
 	{
 		double filledWeight = 1;
-		double groupingFilledWeight = 2;
-		double groupingEmptyWeight = 3;
+		double groupingFilledWeight = 1;
+		double groupingEmptyWeight = 1;
 		double shapesPlaceableWeight = 1;
 		
 		return (int)
 			   (+ calculateNumFilledTiles(board) * filledWeight
-				+ calculateGrouping(board, 1) * groupingFilledWeight		// Calculates grouping of filled tiles
-				+ calculateGrouping(board, 0) * groupingEmptyWeight			// Calculates grouping of empty tiles
+				+ calculateGrouping(board, 1) * groupingFilledWeight			// Calculates grouping of filled tiles
+				+ calculateGrouping(board, 0) * groupingEmptyWeight				// Calculates grouping of empty tiles
 				+ calculateShapesNotPlaceable(board) * shapesPlaceableWeight);
 	}
 	
@@ -358,6 +388,7 @@ public class Solver
 		return board;
 	}
 	
+	@SuppressWarnings("unused")
 	private void printShapeArray(ArrayList<InternalShape> shapes)
 	{
 		for(InternalShape shape: shapes)
@@ -374,6 +405,7 @@ public class Solver
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private void printBoardArray(int[][] board)
 	{
 		for(int i = 0; i < board.length; i++)
