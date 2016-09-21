@@ -31,6 +31,11 @@ public class Solver
 		if(!checkShapePlaceableAnywhere(mBoard, mShapes.get(0)))
 			Collections.reverse(mShapes);
 		
+		do
+		{
+			Collections.shuffle(mShapes);
+		} while(!checkShapePlaceableAnywhere(mBoard, mShapes.get(0)));
+		
 		for(InternalShape shape: mShapes)
 		{
 			// First number is the heuristic value of the current board and the next two numbers are
@@ -174,9 +179,9 @@ public class Solver
 	private int calculateHeuristic(int[][] board)
 	{
 		double filledWeight = 1;
-		double groupingFilledWeight = 1;
-		double groupingEmptyWeight = 1;
-		double shapesPlaceableWeight = 1;
+		double groupingFilledWeight = .25;
+		double groupingEmptyWeight = .25;
+		double shapesPlaceableWeight = 5;
 		
 		return (int)
 			   (+ calculateNumFilledTiles(board) * filledWeight
@@ -187,12 +192,9 @@ public class Solver
 	
 	private int calculateGrouping(int[][] board, int tileStatus)
 	{	
-		//int start = (int) System.currentTimeMillis();
 		int groupingHeuristic = 0;
 		
 		ArrayList<int[]> cachedTiles = new ArrayList<int[]>();
-		int[] temp = {-1, -1};
-		cachedTiles.add(temp);
 		
 		for(int i = 0; i < 10; i++)
 			for(int j = 0; j < 10; j++)
@@ -320,11 +322,19 @@ public class Solver
 						groupingHeuristic++;
 					}
 				}
-		//int end = (int) System.currentTimeMillis();
-		//System.out.println("Status: " + tileStatus + " Heuristic: " + groupingHeuristic + " Number Cached: " + cachedTiles.size() + " Time: " + (end-start) + "ms");
-		//printBoardArray(board);
+		//Adds the total perimeter of the groupings to the groupingHeuristic
+		int totalPerimeter = 0;
 		
-		return groupingHeuristic;
+		//if(tileStatus == 1)
+			for(int[] tile: cachedTiles)
+			{
+				int a = tileStatus == 0 ? 1 : 0;
+				if(tile[0] + 1 < 10 && board[tile[0] + 1][tile[1]] == a) totalPerimeter++; //right
+				if(tile[0] - 1 > -1 && board[tile[0] - 1][tile[1]] == a) totalPerimeter++; //left
+				if(tile[1] + 1 < 10 && board[tile[0]][tile[1] + 1] == a) totalPerimeter++; //down
+				if(tile[1] - 1 > -1 && board[tile[0]][tile[1] - 1] == a) totalPerimeter++; //up
+			}
+			return groupingHeuristic * totalPerimeter;
 	}
 	
 	private int calculateShapesNotPlaceable(int[][] board)
