@@ -24,58 +24,78 @@ public class Solver
 		ArrayList<int[]> bestMoves = new ArrayList<int[]>();
 		int[][] boardClone = cloneBoard(mBoard);
 		
-		// mShapes is sorted based on how many tiles are in each Shape. Shapes with the most tiles are
-		// pushed to the front.
-		Collections.sort(mShapes);
-		
-		if(!checkShapePlaceableAnywhere(mBoard, mShapes.get(0)))
-			Collections.reverse(mShapes);
-		
+		// Go through each tile and calculate the heuristic of the board when each is placed in its
+		// best location. Choose the board with the best board and place that shape.
 		do
 		{
-			Collections.shuffle(mShapes);
-		} while(!checkShapePlaceableAnywhere(mBoard, mShapes.get(0)));
+			for(int i = 0; i < mShapes.size(); i++)
+			{
+				if(checkShapePlaceableAnywhere(boardClone, mShapes.get(i)))
+					break;
+				if(i == mShapes.size() - 1)
+					return null;
+			}
 		
-		for(InternalShape shape: mShapes)
-		{
+			for(InternalShape shape: mShapes)
+				findOptimalPlacement(cloneBoard(boardClone), shape);
+			
+			Collections.sort(mShapes);
+			
+			boardClone = placeShape(boardClone, mShapes.get(0), mShapes.get(0).getX(), mShapes.get(0).getY());
+			int[] a = {mShapes.get(0).getIndex(), mShapes.get(0).getX(), mShapes.get(0).getY()};
+			bestMoves.add(a);
+			
+			mShapes.remove(0);
+		} 
+		while(!mShapes.isEmpty());
+		
+		/*for(InternalShape shape: mShapes)
+		{	
 			// First number is the heuristic value of the current board and the next two numbers are
-			// the x and y coordinates where the shape should be placed
-			int[] bestBoard = {Integer.MAX_VALUE, 0, 0};
+			// the x and y coordinates where the shape should be placed.
 			
 			if(!checkShapePlaceableAnywhere(boardClone, shape))
 				return null;
 			
-			for(int x = 0; x < 10; x++)
+			boardClone = placeShape(boardClone, shape, shape.getX(), shape.getY());
+			int[] temp = {shape.getIndex(), shape.getX(), shape.getY()};
+			bestMoves.add(temp);
+		}*/
+		
+		return bestMoves;
+	}
+	
+	private void findOptimalPlacement(int[][] boardClone, InternalShape shape)
+	{
+		int bestHeuristic = Integer.MAX_VALUE;
+		int x = 0;
+		int y = 0;
+		
+		for(int i = 0; i < 10; i++)
+		{
+			for(int j = 0; j < 10; j++)
 			{
-				for(int y = 0; y < 10; y++)
+				if(checkShapePlaceable(boardClone, shape, i, j))
 				{
-					if(checkShapePlaceable(boardClone, shape, x, y))
+					int[][] board = cloneBoard(boardClone);
+					board =	placeShape(board, shape, i, j);	
+					board = removeFullRowsAndColumns(board);
+					
+					// The best board has the lowest heuristic
+					int boardHeuristic = calculateHeuristic(board, shape);
+					
+					if(boardHeuristic < bestHeuristic)
 					{
-						int[][] board = cloneBoard(boardClone);
-						board =	placeShape(board, shape, x, y);	
-						board = removeFullRowsAndColumns(board);
-						
-						// The best board has the lowest heuristic
-						int boardHeuristic = calculateHeuristic(board);
-						
-						if(boardHeuristic < bestBoard[0])
-						{
-							bestBoard[0] = boardHeuristic;
-							bestBoard[1] = x;
-							bestBoard[2] = y;
-						}
+						bestHeuristic = boardHeuristic;
+						x = i;
+						y = j;
 					}
 				}
 			}
-			
-			boardClone = placeShape(boardClone, shape, bestBoard[1], bestBoard[2]);
-			int[] temp = {shape.getIndex(), bestBoard[1], bestBoard[2]};
-			bestMoves.add(temp);
-		}
-		//System.out.println("Best moves:");
-		//printBoardArray(boardClone);
-		
-		return bestMoves;
+		}	
+		shape.setHeuristic(bestHeuristic);	
+		shape.setX(x);
+		shape.setY(y);
 	}
 	
 	private boolean checkShapePlaceableAnywhere(int[][] board, InternalShape shape)
@@ -176,7 +196,7 @@ public class Solver
 		return board;
 	}
 	
-	private int calculateHeuristic(int[][] board)
+	private int calculateHeuristic(int[][] board, InternalShape shape)
 	{
 		double filledWeight = 1;
 		double groupingFilledWeight = .25;
@@ -326,15 +346,15 @@ public class Solver
 		int totalPerimeter = 0;
 		
 		//if(tileStatus == 1)
-			for(int[] tile: cachedTiles)
-			{
-				int a = tileStatus == 0 ? 1 : 0;
-				if(tile[0] + 1 < 10 && board[tile[0] + 1][tile[1]] == a) totalPerimeter++; //right
-				if(tile[0] - 1 > -1 && board[tile[0] - 1][tile[1]] == a) totalPerimeter++; //left
-				if(tile[1] + 1 < 10 && board[tile[0]][tile[1] + 1] == a) totalPerimeter++; //down
-				if(tile[1] - 1 > -1 && board[tile[0]][tile[1] - 1] == a) totalPerimeter++; //up
-			}
-			return groupingHeuristic * totalPerimeter;
+		for(int[] tile: cachedTiles)
+		{
+			int a = tileStatus == 0 ? 1 : 0;
+			if(tile[0] + 1 < 10 && board[tile[0] + 1][tile[1]] == a) totalPerimeter++; //right
+			if(tile[0] - 1 > -1 && board[tile[0] - 1][tile[1]] == a) totalPerimeter++; //left
+			if(tile[1] + 1 < 10 && board[tile[0]][tile[1] + 1] == a) totalPerimeter++; //down
+			if(tile[1] - 1 > -1 && board[tile[0]][tile[1] - 1] == a) totalPerimeter++; //up
+		}
+		return groupingHeuristic * totalPerimeter;
 	}
 	
 	private int calculateShapesNotPlaceable(int[][] board)
@@ -349,8 +369,12 @@ public class Solver
 						break arg;
 					}
 		
-		
 		return shapesNotPlaceable;
+	}
+	
+	private int calculateCurrentShapesNotPlaceable(int[][] board, InternalShape Shape)
+	{
+		return 0;
 	}
 	
 	private int calculateNumFilledTiles(int[][] board)
@@ -447,27 +471,26 @@ public class Solver
 		private int mIndex;
 		public int getIndex() { return mIndex; }
 		
+		private int mHeuristic;
+		public int getHeuristic() { return mHeuristic; }
+		public void setHeuristic(int heuristic) { mHeuristic = heuristic; }
+		
+		private int mX, mY;
+		public int getX() { return mX; }
+		public void setX(int x) { mX = x; }
+		public int getY() { return mY; }
+		public void setY(int y) { mY = y; }
+		
 		public InternalShape(int[][] tiles, int index)
 		{
 			mTiles = tiles;
 			mIndex = index;
 		}
 		
-		private int getNumFilledTiles()
-		{
-			int arg = 0;
-			
-			for(int i = 0; i < mTiles.length; i++)
-				for(int j = 0; j < mTiles.length; j++)
-					if(mTiles[i][j] == 1)
-						arg++;
-			return arg;
-		}
-		
 		public int compareTo(InternalShape shape) 
 		{
-			return (this.getNumFilledTiles()  > shape.getNumFilledTiles() ? -1 :
-				   (this.getNumFilledTiles() == shape.getNumFilledTiles() ?  0 : 1));
+			return (this.getHeuristic()  < shape.getHeuristic() ? -1 :
+				   (this.getHeuristic() == shape.getHeuristic() ?  0 : 1));
 		}
 	}
 }
