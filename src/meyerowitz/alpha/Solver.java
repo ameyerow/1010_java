@@ -31,63 +31,48 @@ public class Solver {
 				Collections.sort(mShapes);
 			
 			if(!checkShapePlaceable(cloneBoard(boardClone), mShapes.get(0), mShapes.get(0).getX(), mShapes.get(0).getY())) {
-				System.out.println("(" + mShapes.get(0).getX() + ", " + mShapes.get(0).getY() + ")");
-				
 				bestMoves.add(null);
 			} else {
 				boardClone = placeShape(boardClone, mShapes.get(0), mShapes.get(0).getX(), mShapes.get(0).getY());
+				boardClone = removeFullRowsAndColumns(boardClone);
 				int[] a = {mShapes.get(0).getIndex(), mShapes.get(0).getX(), mShapes.get(0).getY()};
 				bestMoves.add(a);
 			}
 			
 			mShapes.remove(0);
 		} while(!mShapes.isEmpty());
-		
-		/*for(InternalShape shape: mShapes)
-		{	
-			// First number is the heuristic value of the current board and the next two numbers are
-			// the x and y coordinates where the shape should be placed.
-			
-			if(!checkShapePlaceableAnywhere(boardClone, shape))
-				return null;
-			
-			boardClone = placeShape(boardClone, shape, shape.getX(), shape.getY());
-			int[] temp = {shape.getIndex(), shape.getX(), shape.getY()};
-			bestMoves.add(temp);
-		}*/
-		
+	
 		return bestMoves;
 	}
 	
 	private void findOptimalPlacement(int[][] boardClone, InternalShape shape) {
-		int[][] bestBoard = new int[10][10];
 		int bestHeuristic = Integer.MAX_VALUE;
 		int x = 0;
 		int y = 0;
 		
-		for(int i = 0; i < 10; i++) {
-			for(int j = 0; j < 10; j++) {
-				if(checkShapePlaceable(boardClone, shape, i, j)) {
-					int[][] board = cloneBoard(boardClone);
-					board =	placeShape(board, shape, i, j);	
-					board = removeFullRowsAndColumns(board);
-					
-					// The best board has the lowest heuristic
-					int boardHeuristic = calculateHeuristic(board, shape);
-					
-					if(boardHeuristic < bestHeuristic) {
-						bestBoard = board;
-						bestHeuristic = boardHeuristic;
-						x = i;
-						y = j;
+		if(checkShapePlaceableAnywhere(boardClone, shape)) {
+			for(int i = 0; i < 10; i++) {
+				for(int j = 0; j < 10; j++) {
+					if(checkShapePlaceable(boardClone, shape, i, j)) {
+						int[][] board = cloneBoard(boardClone);
+						board =	placeShape(board, shape, i, j);	
+						board = removeFullRowsAndColumns(board);
+						
+						// The best board has the lowest heuristic
+						int boardHeuristic = calculateHeuristic(board, shape);
+						
+						if(boardHeuristic < bestHeuristic) {
+							bestHeuristic = boardHeuristic;
+							x = i;
+							y = j;
+						}
 					}
 				}
-			}
-		}	
+			}	
+		} 
 		shape.setHeuristic(bestHeuristic);	
 		shape.setX(x);
 		shape.setY(y);
-		printBoardArray(bestBoard);
 	}
 	
 	private boolean checkShapePlaceableAnywhere(int[][] board, InternalShape shape) {
@@ -99,22 +84,14 @@ public class Solver {
 	}
 	
 	private boolean checkShapePlaceable(int[][] board, InternalShape shape, int x, int y) {
-		boolean placeable = true;
-		
-		arg: for(int i = 0; i < shape.getTiles().length; i++)
+		for(int i = 0; i < shape.getTiles().length; i++)
 			for(int j = 0; j < shape.getTiles().length; j++)
-				if(placeable)
-					if(shape.getTiles()[i][j] == 1) {
-						if((x + i) < 10 & (y + j) < 10)
-							placeable = board[x + i][y + j] == 1 ? false : true;
-						else
-							placeable = false;
-						
-						if(!placeable)
-							break arg;
-					}	
-		
-		return placeable;
+				if(shape.getTiles()[i][j] == 1 )
+					if((x + i) < 10 && (y + j) < 10) {
+						if(board[x + i][y + j] == 1)
+							return false;
+					} else return false;
+		return true;
 	}
 	
 	private int[][] placeShape(int[][] board, InternalShape shape, int x, int y) {
@@ -333,17 +310,13 @@ public class Solver {
 	}
 	
 	@SuppressWarnings("unused")
-	private void printShapeArray(ArrayList<InternalShape> shapes) {
-		for(InternalShape shape: shapes) {
-			for(int i = 0; i < shape.getTiles().length; i++) {
-				for(int j = 0; j < shape.getTiles().length; j++)
-					System.out.print(shape.getTiles()[j][i]);
-				
-				System.out.println("");
+	private void printShapeArray(InternalShape shape) {
+		for(int i = 0; i < shape.getTiles().length; i++) {
+			for(int j = 0; j < shape.getTiles().length; j++) {
+				System.out.print(shape.getTiles()[j][i]);
 			}
-			
 			System.out.println("");
-		}
+		}		
 	}
 	
 	@SuppressWarnings("unused")

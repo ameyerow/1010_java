@@ -13,24 +13,48 @@ public class Game extends JPanel implements MouseListener {
 	private Shape[] mShapes;
 	private Rectangle[][] mHitbox;
 	private int mScore;
+	private int mHighScore;
 	private boolean mGameOver;
 	private Color mSolverColor;
 	private boolean mSolverActivated;
 	
+	
 	public Game() {
 		addMouseListener(this);
+		
+		mSolverColor = new Color(105, 105, 105);
+		mSolverActivated = false;
+		
+		initiate();
+		
+		Runnable runnable = new Runnable(){
+			@Override
+			public void run() {
+				repaint();	
+			}	
+		};
+		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+		executor.scheduleAtFixedRate(runnable, 0, 33, TimeUnit.MILLISECONDS);	
+	}
+	
+	private void initiate()
+	{
+		if(mScore > mHighScore)
+			mHighScore = mScore;
+		
+		// Clears the shapes and the board.
+		mShapes = null;
+		mBoard = null;
+		
+		// Creates a new board and new shapes.
 		mScore = 0;
 		mGameOver = false;
-		mSolverActivated = false;
-		mSolverColor = new Color(105, 105, 105); 
 		mBoard = new Tile[10][10];
 		
 		for(int i = 0; i < 10; i++)
 			for(int j = 0; j < 10; j ++)
 				mBoard[i][j] = new Tile();
 		
-		// create hitbox for the board; each tile has its respective hitbox with the 
-		// same index -- board[x][y] correlates to hitbox[x][y]
 		mHitbox = new Rectangle[10][10];
 		for(int i = 0; i < 10; i++)
 			for(int j = 0; j < 10; j++) {
@@ -43,15 +67,6 @@ public class Game extends JPanel implements MouseListener {
 		
 		for(int i = 0; i < 3; i++)
 			mShapes[i] = new Shape(i);
-		
-		Runnable runnable = new Runnable(){
-			@Override
-			public void run() {
-				repaint();	
-			}	
-		};
-		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-		executor.scheduleAtFixedRate(runnable, 0, 33, TimeUnit.MILLISECONDS);	
 	}
 	
 	private boolean checkAnyPlaceable() {
@@ -122,13 +137,20 @@ public class Game extends JPanel implements MouseListener {
 		super.paint(g);
 		g.setColor(new Color(250, 250, 255));
 		g.fillRect(0, 0, this.getSize().width, this.getSize().height);
+		
 		Graphics2D g2D = (Graphics2D) g;
 		g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2D.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
+		
 		int length = Integer.toString(mScore).length();
 		g2D.setFont(new Font("Abadi MT Condensed Light", Font.PLAIN, 50));
 		g2D.setColor(Tile.blue);
-		g2D.drawString(Integer.toString(mScore), (this.getSize().width/2) - (14 * length), 80);
+		g2D.drawString(Integer.toString(mScore), (this.getSize().width/4) - (14 * length) + 16, 80);
+		
+		length = Integer.toString(mHighScore).length();
+		g2D.setFont(new Font("Abadi MT Condensed Light", Font.PLAIN, 50));
+		g2D.setColor(Tile.lime);
+		g2D.drawString(Integer.toString(mHighScore), (this.getSize().width/4)*3 - (14 * length) , 80);
 		
 		paintSolverButton(g);
 		
@@ -257,20 +279,25 @@ public class Game extends JPanel implements MouseListener {
 									mShapes[move[0]] = null;
 									
 									removeFullRowsAndColumns();
-
-								} else {
-									mSolverActivated = false;
-									mSolverColor = new Color(105, 105, 105);
-									break arg;
 								}
 							}
 							
-							for(int i = 0; i < 3; i++)
-								mShapes[i] = new Shape(i);
+							boolean tilesRemaining = false;
+							for(int j = 0; j < 3; j++)
+								if(mShapes[j] != null)
+									tilesRemaining = true;
+							
+							if(!tilesRemaining)
+								for(int i = 0; i < 3; i++)
+									mShapes[i] = new Shape(i);
 							
 							if(!checkAnyPlaceable()) {
-								mGameOver = true;
+								/*mGameOver = true;
 								mSolverActivated = false;
+								mSolverColor = new Color(105, 105, 105);
+								break arg;
+								*/
+								initiate();
 							}
 						}
 					}
@@ -290,33 +317,7 @@ public class Game extends JPanel implements MouseListener {
 		} else {
 			Rectangle restartHitbox = new Rectangle(100, 175, 150, 150);
 			if(restartHitbox.contains(point)) {
-				// Clears the shapes and the board.
-				mShapes = null;
-				mBoard = null;
-				
-				// Creates a new board and new shapes.
-				mScore = 0;
-				mGameOver = false;
-				mBoard = new Tile[10][10];
-				mSolverColor = new Color(105, 105, 105);
-				mSolverActivated = false;
-				
-				for(int i = 0; i < 10; i++)
-					for(int j = 0; j < 10; j ++)
-						mBoard[i][j] = new Tile();
-				
-				mHitbox = new Rectangle[10][10];
-				for(int i = 0; i < 10; i++)
-					for(int j = 0; j < 10; j++) {
-						int xOffset = offsetCoords(i, mBoard[i][j]);
-						int yOffset = offsetCoords(j, mBoard[i][j]) + 80;
-						mHitbox[i][j] = new Rectangle(xOffset, yOffset, mBoard[i][j].getSize(), mBoard[i][j].getSize());
-					}
-				
-				mShapes = new Shape[3];
-				
-				for(int i = 0; i < 3; i++)
-					mShapes[i] = new Shape(i);
+				initiate();
 			}
 		}
 	}
