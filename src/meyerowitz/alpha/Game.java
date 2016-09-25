@@ -245,41 +245,11 @@ public class Game extends JPanel implements MouseListener {
 							Solver solver = new Solver(mBoard, mShapes);
 							ArrayList<int[]> moves = solver.findBestMoves();
 							
-<<<<<<< HEAD
-							if(moves == null) {
-								mGameOver = true;
-								mSolverActivated = false;
-								mSolverColor = new Color(105, 105, 105);
-								break arg;
-							}
-							
 							for(int[] move : moves) {
-								for(int a = 0; a < mShapes[move[0]].getTiles().length; a++)
-									for(int b = 0; b < mShapes[move[0]].getTiles().length; b++)
-										if(mShapes[move[0]].getTiles()[a][b] != null) {
-											mBoard[move[1] + a][move[2] + b].setColor(mShapes[move[0]].getTiles()[a][b].getColor());
-											mBoard[move[1] + a][move[2] + b].setFilled(true);
-										}
-								mScore += mShapes[move[0]].getValue();
-								mShapes[move[0]] = null;
-							}
-=======
-							//if(moves == null)
-							//{
-							//	mGameOver = true;
-							//	mSolverActivated = false;
-							//	mSolverColor = new Color(105, 105, 105);
-							//	break arg;
-							//}
-							
-							for(int[] move : moves)
-							{
-								if(move != null)
-								{
+								if(move != null) {
 									for(int a = 0; a < mShapes[move[0]].getTiles().length; a++)
 										for(int b = 0; b < mShapes[move[0]].getTiles().length; b++)
-											if(mShapes[move[0]].getTiles()[a][b] != null)
-											{
+											if(mShapes[move[0]].getTiles()[a][b] != null) {
 												mBoard[move[1] + a][move[2] + b].setColor(mShapes[move[0]].getTiles()[a][b].getColor());
 												mBoard[move[1] + a][move[2] + b].setFilled(true);
 											}
@@ -287,11 +257,8 @@ public class Game extends JPanel implements MouseListener {
 									mShapes[move[0]] = null;
 									
 									removeFullRowsAndColumns();
->>>>>>> origin/solver
-							
-								}
-								else 
-								{
+
+								} else {
 									mSolverActivated = false;
 									mSolverColor = new Color(105, 105, 105);
 									break arg;

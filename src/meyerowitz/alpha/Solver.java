@@ -3,8 +3,7 @@ package meyerowitz.alpha;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class Solver 
-{
+public class Solver {
 	private final ArrayList<InternalShape> SHAPES;
 	private ArrayList<InternalShape> mShapes;
 	
@@ -12,44 +11,37 @@ public class Solver
 	// represents a filled tile.
 	private int[][] mBoard;
 	
-	public Solver(Tile[][] board, Shape[] shapes)
-	{	
+	public Solver(Tile[][] board, Shape[] shapes) {	
 		SHAPES = convertShapesToArrayList(Shape.getShapes());
 		mBoard = convertBoardToIntArray(board);
 		mShapes = convertShapesToArrayList(shapes);
 	}
 	
-	public ArrayList<int[]> findBestMoves()
-	{	
+	public ArrayList<int[]> findBestMoves() {	
 		ArrayList<int[]> bestMoves = new ArrayList<int[]>();
 		int[][] boardClone = cloneBoard(mBoard);
 		
 		// Go through each tile and calculate the heuristic of the board when each is placed in its
 		// best location. Choose the board with the best board and place that shape.
-		do
-		{
+		do {
 			for(InternalShape shape: mShapes)
 				findOptimalPlacement(cloneBoard(boardClone), shape);
 			
 			if(mShapes.size() != 1)
 				Collections.sort(mShapes);
 			
-			if(!checkShapePlaceable(cloneBoard(boardClone), mShapes.get(0), mShapes.get(0).getX(), mShapes.get(0).getY()))
-			{
+			if(!checkShapePlaceable(cloneBoard(boardClone), mShapes.get(0), mShapes.get(0).getX(), mShapes.get(0).getY())) {
 				System.out.println("(" + mShapes.get(0).getX() + ", " + mShapes.get(0).getY() + ")");
 				
 				bestMoves.add(null);
-			}
-			else
-			{
+			} else {
 				boardClone = placeShape(boardClone, mShapes.get(0), mShapes.get(0).getX(), mShapes.get(0).getY());
 				int[] a = {mShapes.get(0).getIndex(), mShapes.get(0).getX(), mShapes.get(0).getY()};
 				bestMoves.add(a);
 			}
 			
 			mShapes.remove(0);
-		} 
-		while(!mShapes.isEmpty());
+		} while(!mShapes.isEmpty());
 		
 		/*for(InternalShape shape: mShapes)
 		{	
@@ -67,19 +59,15 @@ public class Solver
 		return bestMoves;
 	}
 	
-	private void findOptimalPlacement(int[][] boardClone, InternalShape shape)
-	{
+	private void findOptimalPlacement(int[][] boardClone, InternalShape shape) {
 		int[][] bestBoard = new int[10][10];
 		int bestHeuristic = Integer.MAX_VALUE;
 		int x = 0;
 		int y = 0;
 		
-		for(int i = 0; i < 10; i++)
-		{
-			for(int j = 0; j < 10; j++)
-			{
-				if(checkShapePlaceable(boardClone, shape, i, j))
-				{
+		for(int i = 0; i < 10; i++) {
+			for(int j = 0; j < 10; j++) {
+				if(checkShapePlaceable(boardClone, shape, i, j)) {
 					int[][] board = cloneBoard(boardClone);
 					board =	placeShape(board, shape, i, j);	
 					board = removeFullRowsAndColumns(board);
@@ -87,8 +75,7 @@ public class Solver
 					// The best board has the lowest heuristic
 					int boardHeuristic = calculateHeuristic(board, shape);
 					
-					if(boardHeuristic < bestHeuristic)
-					{
+					if(boardHeuristic < bestHeuristic) {
 						bestBoard = board;
 						bestHeuristic = boardHeuristic;
 						x = i;
@@ -103,8 +90,7 @@ public class Solver
 		printBoardArray(bestBoard);
 	}
 	
-	private boolean checkShapePlaceableAnywhere(int[][] board, InternalShape shape)
-	{
+	private boolean checkShapePlaceableAnywhere(int[][] board, InternalShape shape) {
 		for(int x = 0; x < 10; x++)
 			for(int y = 0; y < 10; y++)
 				if(checkShapePlaceable(board, shape, x, y))
@@ -112,15 +98,13 @@ public class Solver
 		return false;
 	}
 	
-	private boolean checkShapePlaceable(int[][] board, InternalShape shape, int x, int y)
-	{
+	private boolean checkShapePlaceable(int[][] board, InternalShape shape, int x, int y) {
 		boolean placeable = true;
 		
 		arg: for(int i = 0; i < shape.getTiles().length; i++)
 			for(int j = 0; j < shape.getTiles().length; j++)
 				if(placeable)
-					if(shape.getTiles()[i][j] == 1)
-					{
+					if(shape.getTiles()[i][j] == 1) {
 						if((x + i) < 10 & (y + j) < 10)
 							placeable = board[x + i][y + j] == 1 ? false : true;
 						else
@@ -133,8 +117,7 @@ public class Solver
 		return placeable;
 	}
 	
-	private int[][] placeShape(int[][] board, InternalShape shape, int x, int y)
-	{
+	private int[][] placeShape(int[][] board, InternalShape shape, int x, int y) {
 		for(int i = 0; i < shape.getTiles().length; i++)
 			for(int j = 0; j < shape.getTiles().length; j++)
 				if(shape.getTiles()[i][j] == 1)
@@ -143,38 +126,30 @@ public class Solver
 		return board;
 	}
 	
-	private int[][] removeFullRowsAndColumns(int[][] board)
-	{		
+	private int[][] removeFullRowsAndColumns(int[][] board) {		
 		ArrayList<int[]> arg = new ArrayList<int[]>();
 		
 		for(int i = 0; i < 10; i++)
-			for(int j = 0; j < 10; j++)
-			{
-				if(board[i][j] == 1)
-				{
+			for(int j = 0; j < 10; j++) {
+				if(board[i][j] == 1) {
 					if(j == 9)
-						for(int a = 0; a < 10; a++)
-						{
+						for(int a = 0; a < 10; a++) {
 							int[] index = {i, a};
 							arg.add(index);
 						}
-				}
-				else { break; }
+				} else break; 
 			}
 		
 		for(int i = 0; i < 10; i++)
-			for(int j = 0; j < 10; j++)
-			{
-				if(board[j][i] == 1)
-				{
+			for(int j = 0; j < 10; j++) {
+				if(board[j][i] == 1) {
 					if(j == 9)
-						for(int a = 0; a < 10; a++)
-						{
+						for(int a = 0; a < 10; a++) {
 							int[] index = {a , i};
 							arg.add(index);
 						}
 				}
-				else { break; }
+				else break; 
 			}
 		
 		for(int[] i: arg)
@@ -183,8 +158,7 @@ public class Solver
 		return board;
 	}
 	
-	private int calculateHeuristic(int[][] board, InternalShape shape)
-	{
+	private int calculateHeuristic(int[][] board, InternalShape shape){
 		double filledWeight = 1;
 		double groupingFilledWeight = .25;
 		double groupingEmptyWeight = .25;
@@ -199,38 +173,32 @@ public class Solver
 			    + calculateCurrentShapesNotPlaceable(board, shape) * shapesCurrentPlaceableWeight);
 	}
 	
-	private int calculateGrouping(int[][] board, int tileStatus)
-	{	
+	private int calculateGrouping(int[][] board, int tileStatus) {	
 		int groupingHeuristic = 0;
 		
 		ArrayList<int[]> cachedTiles = new ArrayList<int[]>();
 		
 		for(int i = 0; i < 10; i++)
 			for(int j = 0; j < 10; j++)
-				if(board[i][j] == tileStatus)
-				{
+				if(board[i][j] == tileStatus) {
 					boolean cached = false;
 					
 					for(int[] a: cachedTiles)
 						if(i == a[0] && j == a[1])
 							cached = true;
 							
-					if(!cached)
-					{
+					if(!cached) {
 						ArrayList<int[]> grouping = new ArrayList<int[]>();
 						int[] coords = {i, j};
 						grouping.add(coords);
 						
 						ArrayList<int[]> d = new ArrayList<int[]>();
 						d.addAll(grouping);
-						while(true)
-						{
+						while(true) {
 							ArrayList<int[]> b = new ArrayList<int[]>();
 							
-							for(int[] a : d)
-							{
-								right: if(a[0] + 1 < 10 && board[a[0] + 1][a[1]] == tileStatus)
-								{
+							for(int[] a : d) {
+								right: if(a[0] + 1 < 10 && board[a[0] + 1][a[1]] == tileStatus) {
 									for(int[] c: grouping)
 										if(a[0] + 1 == c[0] && a[1] == c[1])
 											break right;
@@ -241,8 +209,7 @@ public class Solver
 									int[] arg = {a[0] + 1, a[1]};
 									b.add(arg);				
 								}
-								left: if(a[0] - 1 > -1 && board[a[0] - 1][a[1]] == tileStatus)
-								{
+								left: if(a[0] - 1 > -1 && board[a[0] - 1][a[1]] == tileStatus) {
 									for(int[] c: grouping)
 										if(a[0] - 1 == c[0] && a[1] == c[1])
 											break left;
@@ -252,8 +219,7 @@ public class Solver
 									int[] arg = {a[0] - 1, a[1]};
 									b.add(arg);	
 								}
-								down: if(a[1] + 1 < 10 && board[a[0]][a[1] + 1] == tileStatus)
-								{
+								down: if(a[1] + 1 < 10 && board[a[0]][a[1] + 1] == tileStatus) {
 									for(int[] c: grouping)
 										if(a[0] == c[0] && a[1] + 1 == c[1])
 											break down;
@@ -263,8 +229,7 @@ public class Solver
 									int[] arg = {a[0], a[1] + 1};
 									b.add(arg);
 								}
-								up: if(a[1] - 1 > -1 && board[a[0]][a[1] - 1] == tileStatus)
-								{
+								up: if(a[1] - 1 > -1 && board[a[0]][a[1] - 1] == tileStatus) {
 									for(int[] c: grouping)
 										if(a[0] == c[0] && a[1] - 1 == c[1])
 											break up;
@@ -276,8 +241,7 @@ public class Solver
 								}
 							}
 								
-							if(!b.isEmpty()) 
-							{
+							if(!b.isEmpty()) {
 								grouping.addAll(b);
 								d = new ArrayList<int[]>();
 								d.addAll(b);
@@ -292,8 +256,7 @@ public class Solver
 		int totalPerimeter = 0;
 		
 		//if(tileStatus == 1)
-		for(int[] tile: cachedTiles)
-		{
+		for(int[] tile: cachedTiles) {
 			int a = tileStatus == 0 ? 1 : 0;
 			if(tile[0] + 1 < 10 && board[tile[0] + 1][tile[1]] == a) totalPerimeter++; //right
 			if(tile[0] - 1 > -1 && board[tile[0] - 1][tile[1]] == a) totalPerimeter++; //left
@@ -304,14 +267,12 @@ public class Solver
 		return groupingHeuristic * totalPerimeter;
 	}
 	
-	private int calculateShapesNotPlaceable(int[][] board)
-	{
+	private int calculateShapesNotPlaceable(int[][] board) {
 		int shapesNotPlaceable = 19;
 		for(InternalShape shape: SHAPES)
 			arg: for(int i = 0; i < 10; i++)
 				for(int j = 0; j < 10; j++)				
-					if(checkShapePlaceable(board, shape, i, j))
-					{
+					if(checkShapePlaceable(board, shape, i, j)) {
 						shapesNotPlaceable--;
 						break arg;
 					}
@@ -319,8 +280,7 @@ public class Solver
 		return shapesNotPlaceable;
 	}
 	
-	private int calculateCurrentShapesNotPlaceable(int[][] board, InternalShape shape)
-	{
+	private int calculateCurrentShapesNotPlaceable(int[][] board, InternalShape shape) {
 		int currentShapesNotPlaceable = 0;
 		
 		for(InternalShape a: mShapes)
@@ -331,8 +291,7 @@ public class Solver
 		return currentShapesNotPlaceable;
 	}
 	
-	private int calculateNumFilledTiles(int[][] board)
-	{
+	private int calculateNumFilledTiles(int[][] board) {
 		int numFilledTiles = 0;
 		
 		for(int i = 0; i < 10; i++)
@@ -343,15 +302,13 @@ public class Solver
 		return numFilledTiles;
 	}
 	
-	private ArrayList<InternalShape> convertShapesToArrayList(Shape[] tileShapes)
-	{
+	private ArrayList<InternalShape> convertShapesToArrayList(Shape[] tileShapes) {
 		ArrayList<InternalShape> shapes = new ArrayList<InternalShape>();
 		
-		for(int i = 0; i < tileShapes.length; i++)
-		{
-			if(tileShapes[i] == null) shapes.add(null);
-			else
-			{
+		for(int i = 0; i < tileShapes.length; i++) {
+			if(tileShapes[i] == null) {
+				shapes.add(null); 
+			} else {
 				int length = tileShapes[i].getTiles().length;
 				int[][] shape = new int[length][length];
 				
@@ -365,8 +322,7 @@ public class Solver
 		return shapes;
 	}
 	
-	private int[][] convertBoardToIntArray(Tile[][] tileBoard)
-	{
+	private int[][] convertBoardToIntArray(Tile[][] tileBoard) {
 		int[][] board = new int[10][10];
 		
 		for(int i = 0; i < 10; i++)
@@ -377,12 +333,9 @@ public class Solver
 	}
 	
 	@SuppressWarnings("unused")
-	private void printShapeArray(ArrayList<InternalShape> shapes)
-	{
-		for(InternalShape shape: shapes)
-		{
-			for(int i = 0; i < shape.getTiles().length; i++)
-			{
+	private void printShapeArray(ArrayList<InternalShape> shapes) {
+		for(InternalShape shape: shapes) {
+			for(int i = 0; i < shape.getTiles().length; i++) {
 				for(int j = 0; j < shape.getTiles().length; j++)
 					System.out.print(shape.getTiles()[j][i]);
 				
@@ -394,10 +347,8 @@ public class Solver
 	}
 	
 	@SuppressWarnings("unused")
-	private void printBoardArray(int[][] board)
-	{
-		for(int i = 0; i < board.length; i++)
-		{
+	private void printBoardArray(int[][] board) {
+		for(int i = 0; i < board.length; i++) {
 			for(int j = 0; j < board.length; j++)
 				System.out.print(board[j][i]);
 			
@@ -406,8 +357,7 @@ public class Solver
 		System.out.println("");
 	}
 	
-	private int[][] cloneBoard(int[][] board)
-	{
+	private int[][] cloneBoard(int[][] board) {
 		int[][] clone = new int[10][10];
 		
 		for(int i = 0; i < 10; i++)
@@ -417,8 +367,7 @@ public class Solver
 		return clone;
 	}
 	
-	private class InternalShape implements Comparable<InternalShape>
-	{
+	private class InternalShape implements Comparable<InternalShape> {
 		private int[][] mTiles;
 		public int[][] getTiles() { return mTiles; }
 		
@@ -435,14 +384,12 @@ public class Solver
 		public int getY() { return mY; }
 		public void setY(int y) { mY = y; }
 		
-		public InternalShape(int[][] tiles, int index)
-		{
+		public InternalShape(int[][] tiles, int index) {
 			mTiles = tiles;
 			mIndex = index;
 		}
 		
-		public int compareTo(InternalShape shape) 
-		{
+		public int compareTo(InternalShape shape) {
 			return (this.getHeuristic()  < shape.getHeuristic() ? -1 :
 				   (this.getHeuristic() == shape.getHeuristic() ?  0 : 1));
 		}
