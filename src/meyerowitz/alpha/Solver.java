@@ -28,22 +28,24 @@ public class Solver
 		// best location. Choose the board with the best board and place that shape.
 		do
 		{
-			for(int i = 0; i < mShapes.size(); i++)
-			{
-				if(checkShapePlaceableAnywhere(boardClone, mShapes.get(i)))
-					break;
-				if(i == mShapes.size() - 1)
-					return null;
-			}
-		
 			for(InternalShape shape: mShapes)
 				findOptimalPlacement(cloneBoard(boardClone), shape);
 			
-			Collections.sort(mShapes);
+			if(mShapes.size() != 1)
+				Collections.sort(mShapes);
 			
-			boardClone = placeShape(boardClone, mShapes.get(0), mShapes.get(0).getX(), mShapes.get(0).getY());
-			int[] a = {mShapes.get(0).getIndex(), mShapes.get(0).getX(), mShapes.get(0).getY()};
-			bestMoves.add(a);
+			if(!checkShapePlaceable(cloneBoard(boardClone), mShapes.get(0), mShapes.get(0).getX(), mShapes.get(0).getY()))
+			{
+				System.out.println("(" + mShapes.get(0).getX() + ", " + mShapes.get(0).getY() + ")");
+				
+				bestMoves.add(null);
+			}
+			else
+			{
+				boardClone = placeShape(boardClone, mShapes.get(0), mShapes.get(0).getX(), mShapes.get(0).getY());
+				int[] a = {mShapes.get(0).getIndex(), mShapes.get(0).getX(), mShapes.get(0).getY()};
+				bestMoves.add(a);
+			}
 			
 			mShapes.remove(0);
 		} 
@@ -67,6 +69,7 @@ public class Solver
 	
 	private void findOptimalPlacement(int[][] boardClone, InternalShape shape)
 	{
+		int[][] bestBoard = new int[10][10];
 		int bestHeuristic = Integer.MAX_VALUE;
 		int x = 0;
 		int y = 0;
@@ -86,6 +89,7 @@ public class Solver
 					
 					if(boardHeuristic < bestHeuristic)
 					{
+						bestBoard = board;
 						bestHeuristic = boardHeuristic;
 						x = i;
 						y = j;
@@ -96,32 +100,15 @@ public class Solver
 		shape.setHeuristic(bestHeuristic);	
 		shape.setX(x);
 		shape.setY(y);
+		printBoardArray(bestBoard);
 	}
 	
 	private boolean checkShapePlaceableAnywhere(int[][] board, InternalShape shape)
 	{
-		for(int i = 0; i < 10; i++)
-			for(int j = 0; j < 10; j++)
-			{				
-				boolean placeable = true;
-				for(int a = 0; a < shape.getTiles().length; a++)
-				{
-					for(int b = 0; b < shape.getTiles().length; b++)
-					{
-						if(placeable)
-							if(shape.getTiles()[a][b] == 1)
-							{
-								if((i + a) < 10 & (j + b) < 10)
-									placeable = board[i + a][j + b] == 1 ? false : true;
-								else
-									placeable = false;
-							}
-					}
-				}
-				if(placeable)
-					return true;
-			}
-		
+		for(int x = 0; x < 10; x++)
+			for(int y = 0; y < 10; y++)
+				if(checkShapePlaceable(board, shape, x, y))
+					return true;	
 		return false;
 	}
 	
@@ -202,12 +189,14 @@ public class Solver
 		double groupingFilledWeight = .25;
 		double groupingEmptyWeight = .25;
 		double shapesPlaceableWeight = 5;
+		double shapesCurrentPlaceableWeight = 20;
 		
 		return (int)
 			   (+ calculateNumFilledTiles(board) * filledWeight
 				+ calculateGrouping(board, 1) * groupingFilledWeight			// Calculates grouping of filled tiles
 				+ calculateGrouping(board, 0) * groupingEmptyWeight				// Calculates grouping of empty tiles
-				+ calculateShapesNotPlaceable(board) * shapesPlaceableWeight);
+				+ calculateShapesNotPlaceable(board) * shapesPlaceableWeight
+			    + calculateCurrentShapesNotPlaceable(board, shape) * shapesCurrentPlaceableWeight);
 	}
 	
 	private int calculateGrouping(int[][] board, int tileStatus)
@@ -232,113 +221,70 @@ public class Solver
 						int[] coords = {i, j};
 						grouping.add(coords);
 						
-						boolean connected = false;
-						
-						right: if(i + 1 < 10 && board[i + 1][j] == tileStatus)
+						ArrayList<int[]> d = new ArrayList<int[]>();
+						d.addAll(grouping);
+						while(true)
 						{
-							for(int[] a: cachedTiles)
-								if(i + 1 == a[0] && j == a[1])
-									break right;
-							int[] arg = {i + 1, j};
-							grouping.add(arg);
-							connected = true;
+							ArrayList<int[]> b = new ArrayList<int[]>();
 							
-						}
-						left: if(i - 1 > -1 && board[i - 1][j] == tileStatus)
-						{
-							for(int[] a: cachedTiles)
-								if(i - 1 == a[0] && j == a[1] )
-									break left;
-							int[] arg = {i - 1, j};
-							grouping.add(arg);
-							connected = true;
-						}
-						down: if(j + 1 < 10 && board[i][j + 1] == tileStatus)
-						{
-							for(int[] a: cachedTiles)
-								if(i == a[0] && j + 1 == a[1] )
-									break down;
-							int[] arg = {i, j + 1};
-							grouping.add(arg);
-							connected = true;
-						}
-						up: if(j - 1 > -1 && board[i][j - 1] == tileStatus)
-						{
-							for(int[] a: cachedTiles)
-								if(i == a[0] && j - 1 == a[1] )
-									break up;
-							int[] arg = {i, j - 1};
-							grouping.add(arg);
-							connected = true;
-						}
-						
-						if(connected)
-						{
-							ArrayList<int[]> d = new ArrayList<int[]>();
-							d.addAll(grouping);
-							while(true)
+							for(int[] a : d)
 							{
-								ArrayList<int[]> b = new ArrayList<int[]>();
-								
-								for(int[] a : d)
+								right: if(a[0] + 1 < 10 && board[a[0] + 1][a[1]] == tileStatus)
 								{
-									right: if(a[0] + 1 < 10 && board[a[0] + 1][a[1]] == tileStatus)
-									{
-										for(int[] c: grouping)
-											if(a[0] + 1 == c[0] && a[1] == c[1])
-												break right;
-										for(int[] c: b)
-											if(a[0] + 1 == c[0] && a[1] == c[1])
-												break right;
+									for(int[] c: grouping)
+										if(a[0] + 1 == c[0] && a[1] == c[1])
+											break right;
+									for(int[] c: b)
+										if(a[0] + 1 == c[0] && a[1] == c[1])
+											break right;
 										
-										int[] arg = {a[0] + 1, a[1]};
-										b.add(arg);				
-									}
-									left: if(a[0] - 1 > -1 && board[a[0] - 1][a[1]] == tileStatus)
-									{
-										for(int[] c: grouping)
-											if(a[0] - 1 == c[0] && a[1] == c[1])
-												break left;
-										for(int[] c: b)
-											if(a[0] - 1 == c[0] && a[1] == c[1])
-												break left;
-										int[] arg = {a[0] - 1, a[1]};
-										b.add(arg);	
-									}
-									down: if(a[1] + 1 < 10 && board[a[0]][a[1] + 1] == tileStatus)
-									{
-										for(int[] c: grouping)
-											if(a[0] == c[0] && a[1] + 1 == c[1])
-												break down;
-										for(int[] c: b)
-											if(a[0] == c[0] && a[1] + 1 == c[1])
-												break down;
-										int[] arg = {a[0], a[1] + 1};
-										b.add(arg);
-									}
-									up: if(a[1] - 1 > -1 && board[a[0]][a[1] - 1] == tileStatus)
-									{
-										for(int[] c: grouping)
-											if(a[0] == c[0] && a[1] - 1 == c[1])
-												break up;
-										for(int[] c: b)
-											if(a[0] == c[0] && a[1] - 1 == c[1])
-												break up;
-										int[] arg = {a[0], a[1] - 1};
-										b.add(arg);
-									}
+									int[] arg = {a[0] + 1, a[1]};
+									b.add(arg);				
 								}
-								
-								if(!b.isEmpty()) 
+								left: if(a[0] - 1 > -1 && board[a[0] - 1][a[1]] == tileStatus)
 								{
-									grouping.addAll(b);
-									d = new ArrayList<int[]>();
-									d.addAll(b);
+									for(int[] c: grouping)
+										if(a[0] - 1 == c[0] && a[1] == c[1])
+											break left;
+									for(int[] c: b)
+										if(a[0] - 1 == c[0] && a[1] == c[1])
+											break left;
+									int[] arg = {a[0] - 1, a[1]};
+									b.add(arg);	
 								}
-								else break;
-							}		
-							cachedTiles.addAll(grouping);
-						}
+								down: if(a[1] + 1 < 10 && board[a[0]][a[1] + 1] == tileStatus)
+								{
+									for(int[] c: grouping)
+										if(a[0] == c[0] && a[1] + 1 == c[1])
+											break down;
+									for(int[] c: b)
+										if(a[0] == c[0] && a[1] + 1 == c[1])
+											break down;
+									int[] arg = {a[0], a[1] + 1};
+									b.add(arg);
+								}
+								up: if(a[1] - 1 > -1 && board[a[0]][a[1] - 1] == tileStatus)
+								{
+									for(int[] c: grouping)
+										if(a[0] == c[0] && a[1] - 1 == c[1])
+											break up;
+									for(int[] c: b)
+										if(a[0] == c[0] && a[1] - 1 == c[1])
+											break up;
+									int[] arg = {a[0], a[1] - 1};
+									b.add(arg);
+								}
+							}
+								
+							if(!b.isEmpty()) 
+							{
+								grouping.addAll(b);
+								d = new ArrayList<int[]>();
+								d.addAll(b);
+							}
+							else break;
+						}		
+						cachedTiles.addAll(grouping);
 						groupingHeuristic++;
 					}
 				}
@@ -354,6 +300,7 @@ public class Solver
 			if(tile[1] + 1 < 10 && board[tile[0]][tile[1] + 1] == a) totalPerimeter++; //down
 			if(tile[1] - 1 > -1 && board[tile[0]][tile[1] - 1] == a) totalPerimeter++; //up
 		}
+		
 		return groupingHeuristic * totalPerimeter;
 	}
 	
@@ -372,9 +319,16 @@ public class Solver
 		return shapesNotPlaceable;
 	}
 	
-	private int calculateCurrentShapesNotPlaceable(int[][] board, InternalShape Shape)
+	private int calculateCurrentShapesNotPlaceable(int[][] board, InternalShape shape)
 	{
-		return 0;
+		int currentShapesNotPlaceable = 0;
+		
+		for(InternalShape a: mShapes)
+			if(a != shape)
+				if(!checkShapePlaceableAnywhere(board, shape))
+					currentShapesNotPlaceable++;
+		
+		return currentShapesNotPlaceable;
 	}
 	
 	private int calculateNumFilledTiles(int[][] board)
