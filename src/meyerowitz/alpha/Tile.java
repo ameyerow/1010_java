@@ -36,14 +36,12 @@ public class Tile
 	public void setEdgeOffset(int edgeOffset) { mEdgeOffset = edgeOffset; }
 	
 	// Constructor is used to easily generate empty tiles at the games instantiation.
-	public Tile()
-	{
+	public Tile() {
 		this(false, gray);
 	}
 	
 	// Constructor for board tiles 
-	public Tile(boolean filled, Color color)
-	{
+	public Tile(boolean filled, Color color) {
 		this.mFilled = filled;
 		this.mColor = color;
 		mSize = 30;
@@ -52,8 +50,7 @@ public class Tile
 	}
 	
 	// Constructor for shape tiles
-	public Tile(Color color)
-	{
+	public Tile(Color color) {
 		this.mColor = color;
 		mSize = 20;
 		mTileOffset = 1;

@@ -16,22 +16,17 @@ public class Shape
 	
 	private boolean mLifted = false;
 	public boolean getLifted() { return mLifted; }
-	public void setLifted(boolean lifted) 
-	{ 
+	public void setLifted(boolean lifted) { 
 		mLifted = lifted; 
 		
 		for(int i = 0; i < mTiles.length; i++)
 			for(int j = 0; j < mTiles.length; j++)
-				if(mTiles[i][j] != null)
-				{
-					if(lifted == true)
-					{
+				if(mTiles[i][j] != null) {
+					if(lifted == true) {
 						mTiles[i][j].setSize(27);
 						mTiles[i][j].setTileOffset(5);
 						mTiles[i][j].setEdgeOffset(0);
-					}
-					else
-					{
+					} else {
 						mTiles[i][j].setSize(20);
 						mTiles[i][j].setTileOffset(1);
 						mTiles[i][j].setEdgeOffset(7);
@@ -41,15 +36,12 @@ public class Shape
 	
 	// Once this constructor is called, a random tile is picked and created by 
 	// calling the Shape(int arg) constructor.
-	public Shape(int index) 
-	{
+	public Shape(int index) {
 		this((int)(Math.random() * 19), index); // {0,...,18}
 	}
 	
-	public Shape(int arg, int index)
-	{
-		switch(arg)
-		{
+	public Shape(int arg, int index) {
+		switch(arg) {
 			// 1*1 square
 			case 0:
 				mTiles = new Tile[1][1];
@@ -107,8 +99,7 @@ public class Shape
 			case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 18:
 				int length = (int)(Math.random()* (6 - 2) + 2); // {2,...,5}
 				Color color = null;
-				switch(length)
-				{
+				switch(length) {
 					case 2:
 						color = Tile.yellow;
 						break;
@@ -126,8 +117,7 @@ public class Shape
 				int orientation = (int)(Math.random() * 2); // {0,1}
 				mTiles = new Tile[length][length];
 				
-				for(int i = 0; i < length; i++)
-				{
+				for(int i = 0; i < length; i++) {
 					if(orientation == 0)
 						mTiles[i][0] = new Tile(color);
 					else
@@ -141,8 +131,7 @@ public class Shape
 		int tileQuantity = 0;
 		for(int i = 0; i < mTiles.length; i++)
 			for(int j = 0; j < mTiles.length; j++)
-				if(mTiles[i][j] != null)
-				{
+				if(mTiles[i][j] != null) {
 					tileQuantity++;
 				}
 		
@@ -150,8 +139,7 @@ public class Shape
 		int a = 0;
 		for(int i = 0; i < mTiles.length; i++)
 			for(int j = 0; j < mTiles.length; j++)
-				if(mTiles[i][j] != null)
-				{
+				if(mTiles[i][j] != null) {
 					int xOffset = offsetCoords(i, mTiles[i][j]) + (115 * index);
 					int yOffset = offsetCoords(j, mTiles[i][j]) + 430;
 					mHitbox[a] = new Rectangle(
@@ -163,29 +151,25 @@ public class Shape
 		mValue = tileQuantity;
 	}
 	
-	private int offsetCoords(int arg, Tile tile)
-	{
+	private int offsetCoords(int arg, Tile tile) {
 		return arg * (tile.getSize() + tile.getTileOffset()) + tile.getEdgeOffset();
 	}
 	
 	public Shape(Tile[][] tiles) { this.mTiles = tiles; }
 	
-	public static Shape[] getShapes()
-	{
+	public static Shape[] getShapes() {
 		Shape[] shapes = new Shape[19];
 		Tile[][] tiles;
 		int index = 0;
 		
 		// Adds all the squares and gets up to Shape[2]
-		for(int i = 0; i < 3; i++)
-		{
+		for(int i = 0; i < 3; i++) {
 			shapes[index++] = new Shape(i, 0);
 		}
 		
 		// Adds all the small L-shape and gets up to Shape[6] 
 		for(int i = 0; i < 2; i++)
-			for(int j = 0; j < 2; j++)
-			{
+			for(int j = 0; j < 2; j++) {
 				tiles = new Tile[2][2];
 				for(int k = 0; k < 2; k++)
 					for(int l = 0; l < 2; l++)
@@ -198,8 +182,7 @@ public class Shape
 		
 		// Adds all the big L-shape and gets up to Shape[10]
 		for(int i = 0; i < 2; i++)
-			for(int j = 0; j < 2; j++)
-			{
+			for(int j = 0; j < 2; j++) {
 				tiles = new Tile[3][3];
 				for(int k = 0; k < 3; k++)
 					for(int l = 0; l < 3; l++)
@@ -223,12 +206,10 @@ public class Shape
 		
 		//Adds all the horizontal and vertical lines and gets up to Shape[18]
 		for(int i = 2; i < 6; i++)
-			for(int j = 0; j < 2; j++)
-			{	
+			for(int j = 0; j < 2; j++) {	
 				tiles = new Tile[i][i];
 				
-				for(int k = 0; k < i; k++)
-				{
+				for(int k = 0; k < i; k++) {
 					if(j == 0)
 						tiles[k][0] = new Tile(null);
 					else
@@ -242,10 +223,8 @@ public class Shape
 		return shapes;
 	}
 	
-	public boolean contains(Point arg)
-	{
-		for(Rectangle rectangle: mHitbox)
-		{
+	public boolean contains(Point arg) {
+		for(Rectangle rectangle: mHitbox) {
 			if(rectangle.contains(arg))
 				return true;
 		}
