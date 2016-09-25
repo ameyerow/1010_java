@@ -274,28 +274,38 @@ public class Game extends JPanel implements MouseListener
 							Solver solver = new Solver(mBoard, mShapes);
 							ArrayList<int[]> moves = solver.findBestMoves();
 							
-							if(moves == null)
-							{
-								mGameOver = true;
-								mSolverActivated = false;
-								mSolverColor = new Color(105, 105, 105);
-								break arg;
-							}
+							//if(moves == null)
+							//{
+							//	mGameOver = true;
+							//	mSolverActivated = false;
+							//	mSolverColor = new Color(105, 105, 105);
+							//	break arg;
+							//}
 							
 							for(int[] move : moves)
 							{
-								for(int a = 0; a < mShapes[move[0]].getTiles().length; a++)
-									for(int b = 0; b < mShapes[move[0]].getTiles().length; b++)
-										if(mShapes[move[0]].getTiles()[a][b] != null)
-										{
-											mBoard[move[1] + a][move[2] + b].setColor(mShapes[move[0]].getTiles()[a][b].getColor());
-											mBoard[move[1] + a][move[2] + b].setFilled(true);
-										}
-								mScore += mShapes[move[0]].getValue();
-								mShapes[move[0]] = null;
-							}
+								if(move != null)
+								{
+									for(int a = 0; a < mShapes[move[0]].getTiles().length; a++)
+										for(int b = 0; b < mShapes[move[0]].getTiles().length; b++)
+											if(mShapes[move[0]].getTiles()[a][b] != null)
+											{
+												mBoard[move[1] + a][move[2] + b].setColor(mShapes[move[0]].getTiles()[a][b].getColor());
+												mBoard[move[1] + a][move[2] + b].setFilled(true);
+											}
+									mScore += mShapes[move[0]].getValue();
+									mShapes[move[0]] = null;
+									
+									removeFullRowsAndColumns();
 							
-							removeFullRowsAndColumns();
+								}
+								else 
+								{
+									mSolverActivated = false;
+									mSolverColor = new Color(105, 105, 105);
+									break arg;
+								}
+							}
 							
 							for(int i = 0; i < 3; i++)
 								mShapes[i] = new Shape(i);
@@ -425,7 +435,7 @@ public class Game extends JPanel implements MouseListener
 			for(Shape shape: mShapes)
 				if(shape != null && shape.getLifted())
 					shape.setLifted(false);
-				
+
 			removeFullRowsAndColumns();
 			
 			// Generates new shapes if all shapes are null -- if there are no remaining shapes
