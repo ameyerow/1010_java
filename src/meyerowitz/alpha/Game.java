@@ -14,6 +14,8 @@ public class Game extends JPanel implements MouseListener {
 	private Rectangle[][] mHitbox;
 	private int mScore;
 	private int mHighScore;
+	private int mTotalScore;
+	private int mTries;
 	private boolean mGameOver;
 	private Color mSolverColor;
 	private boolean mSolverActivated;
@@ -22,6 +24,8 @@ public class Game extends JPanel implements MouseListener {
 	public Game() {
 		addMouseListener(this);
 		
+		mTotalScore = 0;
+		mTries = 0;
 		mSolverColor = new Color(105, 105, 105);
 		mSolverActivated = false;
 		
@@ -41,6 +45,9 @@ public class Game extends JPanel implements MouseListener {
 	{
 		if(mScore > mHighScore)
 			mHighScore = mScore;
+		
+		mTotalScore += mScore;
+		mTries++;
 		
 		// Clears the shapes and the board.
 		mShapes = null;
@@ -148,9 +155,14 @@ public class Game extends JPanel implements MouseListener {
 		g2D.drawString(Integer.toString(mScore), (this.getSize().width/4) - (14 * length) + 16, 80);
 		
 		length = Integer.toString(mHighScore).length();
-		g2D.setFont(new Font("Abadi MT Condensed Light", Font.PLAIN, 50));
 		g2D.setColor(Tile.lime);
 		g2D.drawString(Integer.toString(mHighScore), (this.getSize().width/4)*3 - (14 * length) , 80);
+		
+		int average = mTotalScore / mTries;
+		g2D.setColor(Tile.blue);
+		g2D.setFont(new Font("Abadi MT Condensed Light", Font.PLAIN, 25));
+		g2D.drawString(Integer.toString(average), 20, this.getSize().height - 20);
+		
 		
 		paintSolverButton(g);
 		
@@ -261,7 +273,7 @@ public class Game extends JPanel implements MouseListener {
 				Runnable runnable = new Runnable() {
 					@Override
 					public void run() {
-						arg: while(mSolverActivated) {
+						while(mSolverActivated) {
 							// A solver is generated with the board and the current shapes. It uses these 
 							// to find the "best moves" which it transmits as a int[][]
 							Solver solver = new Solver(mBoard, mShapes);
@@ -291,14 +303,8 @@ public class Game extends JPanel implements MouseListener {
 								for(int i = 0; i < 3; i++)
 									mShapes[i] = new Shape(i);
 							
-							if(!checkAnyPlaceable()) {
-								/*mGameOver = true;
-								mSolverActivated = false;
-								mSolverColor = new Color(105, 105, 105);
-								break arg;
-								*/
-								initiate();
-							}
+							if(!checkAnyPlaceable()) 
+								initiate();	
 						}
 					}
 				};

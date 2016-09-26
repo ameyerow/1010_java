@@ -135,16 +135,14 @@ public class Solver {
 		return board;
 	}
 	
-	private int calculateHeuristic(int[][] board, InternalShape shape){
+	private int calculateHeuristic(int[][] board, InternalShape shape) {
 		double filledWeight = 1;
-		double groupingFilledWeight = .25;
-		double groupingEmptyWeight = .25;
+		double groupingEmptyWeight = 1;
 		double shapesPlaceableWeight = 5;
-		double shapesCurrentPlaceableWeight = 20;
+		double shapesCurrentPlaceableWeight = 40;
 		
 		return (int)
 			   (+ calculateNumFilledTiles(board) * filledWeight
-				+ calculateGrouping(board, 1) * groupingFilledWeight			// Calculates grouping of filled tiles
 				+ calculateGrouping(board, 0) * groupingEmptyWeight				// Calculates grouping of empty tiles
 				+ calculateShapesNotPlaceable(board) * shapesPlaceableWeight
 			    + calculateCurrentShapesNotPlaceable(board, shape) * shapesCurrentPlaceableWeight);
