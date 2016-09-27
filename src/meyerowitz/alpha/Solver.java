@@ -138,12 +138,14 @@ public class Solver {
 	private int calculateHeuristic(int[][] board, InternalShape shape) {
 		double filledWeight = 1;
 		double groupingEmptyWeight = 1;
+		double groupingFilledWeight = 1;
 		double shapesPlaceableWeight = 5;
 		double shapesCurrentPlaceableWeight = 40;
 		
 		return (int)
 			   (+ calculateNumFilledTiles(board) * filledWeight
 				+ calculateGrouping(board, 0) * groupingEmptyWeight				// Calculates grouping of empty tiles
+				+ calculateGrouping(board, 1) * groupingFilledWeight	
 				+ calculateShapesNotPlaceable(board) * shapesPlaceableWeight
 			    + calculateCurrentShapesNotPlaceable(board, shape) * shapesCurrentPlaceableWeight);
 	}
@@ -228,18 +230,23 @@ public class Solver {
 					}
 				}
 		//Adds the total perimeter of the groupings to the groupingHeuristic
-		int totalPerimeter = 0;
 		
-		//if(tileStatus == 1)
-		for(int[] tile: cachedTiles) {
-			int a = tileStatus == 0 ? 1 : 0;
-			if(tile[0] + 1 < 10 && board[tile[0] + 1][tile[1]] == a) totalPerimeter++; //right
-			if(tile[0] - 1 > -1 && board[tile[0] - 1][tile[1]] == a) totalPerimeter++; //left
-			if(tile[1] + 1 < 10 && board[tile[0]][tile[1] + 1] == a) totalPerimeter++; //down
-			if(tile[1] - 1 > -1 && board[tile[0]][tile[1] - 1] == a) totalPerimeter++; //up
+		
+		if(tileStatus == 0) {
+			int totalPerimeter = 0;
+			
+			for(int[] tile: cachedTiles) {
+				int a = tileStatus == 0 ? 1 : 0;
+				if(tile[0] + 1 < 10 && board[tile[0] + 1][tile[1]] == a) totalPerimeter++; //right
+				if(tile[0] - 1 > -1 && board[tile[0] - 1][tile[1]] == a) totalPerimeter++; //left
+				if(tile[1] + 1 < 10 && board[tile[0]][tile[1] + 1] == a) totalPerimeter++; //down
+				if(tile[1] - 1 > -1 && board[tile[0]][tile[1] - 1] == a) totalPerimeter++; //up
+			}
+			
+			return groupingHeuristic * totalPerimeter;
+		} else {
+			return groupingHeuristic;
 		}
-		
-		return groupingHeuristic * totalPerimeter;
 	}
 	
 	private int calculateShapesNotPlaceable(int[][] board) {
