@@ -18,16 +18,16 @@ public class Game extends JPanel implements MouseListener {
 	private int mTries;
 	private boolean mGameOver;
 	private Color mSolverColor;
-	private boolean mSolverActivated;
+	private int mSolverMode;
 	
 	
 	public Game() {
 		addMouseListener(this);
 		
+		mSolverMode = 0;
 		mTotalScore = 0;
-		mTries = 0;
+		mTries = -1;
 		mSolverColor = new Color(105, 105, 105);
-		mSolverActivated = false;
 		
 		initiate();
 		
@@ -158,7 +158,7 @@ public class Game extends JPanel implements MouseListener {
 		g2D.setColor(Tile.lime);
 		g2D.drawString(Integer.toString(mHighScore), (this.getSize().width/4)*3 - (14 * length) , 80);
 		
-		int average = mTotalScore / mTries;
+		int average = mTries != 0 ? mTotalScore / mTries : 0;
 		g2D.setColor(Tile.blue);
 		g2D.setFont(new Font("Abadi MT Condensed Light", Font.PLAIN, 25));
 		g2D.drawString(Integer.toString(average), 20, this.getSize().height - 20);
@@ -273,7 +273,7 @@ public class Game extends JPanel implements MouseListener {
 				Runnable runnable = new Runnable() {
 					@Override
 					public void run() {
-						while(mSolverActivated) {
+						while(mSolverMode!= 0) {
 							// A solver is generated with the board and the current shapes. It uses these 
 							// to find the "best moves" which it transmits as a int[][]
 							Solver solver = new Solver(mBoard, mShapes);
@@ -290,8 +290,22 @@ public class Game extends JPanel implements MouseListener {
 									mScore += mShapes[move[0]].getValue();
 									mShapes[move[0]] = null;
 									
+									if(mSolverMode == 1) 
+										try {
+										    Thread.sleep(250);              
+										} catch(InterruptedException e) {
+										    Thread.currentThread().interrupt();
+										}
+									
 									removeFullRowsAndColumns();
 								}
+								
+								if(mSolverMode == 1)
+									try {
+									    Thread.sleep(400);              
+									} catch(InterruptedException e) {
+									    Thread.currentThread().interrupt();
+									}
 							}
 							
 							boolean tilesRemaining = false;
@@ -304,20 +318,36 @@ public class Game extends JPanel implements MouseListener {
 									mShapes[i] = new Shape(i);
 							
 							if(!checkAnyPlaceable()) 
-								initiate();	
+								if(mSolverMode == 2) {
+									initiate();
+								} else {
+									mGameOver = true;
+									mSolverMode = 0;
+									mSolverColor = Tile.darkgray;
+								}
+							
+							
+							if(mSolverMode == 1)
+								try {
+								    Thread.sleep(400);              
+								} catch(InterruptedException e) {
+								    Thread.currentThread().interrupt();
+								}
 						}
 					}
 				};
 				Thread thread = new Thread(runnable);
 				
-				if(!mSolverActivated) {
-					mSolverColor = new Color(113, 219, 212);
-					mSolverActivated = true;
-					
+				if(mSolverMode == 0) {
+					mSolverColor = Tile.turquois;
+					mSolverMode = 1;
 					thread.start();
+				} else if(mSolverMode == 1){
+					mSolverColor = Tile.red;
+					mSolverMode = 2;
 				} else {
-					mSolverColor = new Color(105, 105, 105);
-					mSolverActivated = false;
+					mSolverColor = Tile.darkgray;
+					mSolverMode = 0;
 				}
 			}
 		} else {

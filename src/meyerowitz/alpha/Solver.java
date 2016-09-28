@@ -90,7 +90,7 @@ public class Solver {
 					if((x + i) < 10 && (y + j) < 10) {
 						if(board[x + i][y + j] == 1)
 							return false;
-					} else return false;
+					} else  return false;
 		return true;
 	}
 	
@@ -138,14 +138,14 @@ public class Solver {
 	private int calculateHeuristic(int[][] board, InternalShape shape) {
 		double filledWeight = 1;
 		double groupingEmptyWeight = 1;
-		double groupingFilledWeight = 1;
+		//double groupingFilledWeight = 0;
 		double shapesPlaceableWeight = 5;
 		double shapesCurrentPlaceableWeight = 40;
 		
 		return (int)
 			   (+ calculateNumFilledTiles(board) * filledWeight
 				+ calculateGrouping(board, 0) * groupingEmptyWeight				// Calculates grouping of empty tiles
-				+ calculateGrouping(board, 1) * groupingFilledWeight	
+				//+ calculateGrouping(board, 1) * groupingFilledWeight	
 				+ calculateShapesNotPlaceable(board) * shapesPlaceableWeight
 			    + calculateCurrentShapesNotPlaceable(board, shape) * shapesCurrentPlaceableWeight);
 	}
@@ -264,13 +264,12 @@ public class Solver {
 	
 	private int calculateCurrentShapesNotPlaceable(int[][] board, InternalShape shape) {
 		int currentShapesNotPlaceable = 0;
-		
 		for(InternalShape a: mShapes)
 			if(a != shape)
-				if(!checkShapePlaceableAnywhere(board, shape))
-					currentShapesNotPlaceable++;
-		
+				if(!checkShapePlaceableAnywhere(board, a))
+					currentShapesNotPlaceable++;	
 		return currentShapesNotPlaceable;
+		
 	}
 	
 	private int calculateNumFilledTiles(int[][] board) {
@@ -345,7 +344,7 @@ public class Solver {
 		return clone;
 	}
 	
-	private class InternalShape implements Comparable<InternalShape> {
+	private class InternalShape implements Comparable<InternalShape>, Cloneable {
 		private int[][] mTiles;
 		public int[][] getTiles() { return mTiles; }
 		
@@ -367,6 +366,19 @@ public class Solver {
 			mIndex = index;
 		}
 		
+		@Override
+		protected InternalShape clone() throws CloneNotSupportedException {
+			int[][] tiles = new int[mTiles.length][mTiles.length];
+			for(int i = 0; i < mTiles.length; i++)
+	    	   for(int j = 0; j < mTiles.length; j++)
+	    		   tiles[i][j] = mTiles[i][j];
+			
+	        InternalShape shape = new InternalShape(tiles, getIndex());
+	        
+			return shape;
+	    }
+		
+		@Override
 		public int compareTo(InternalShape shape) {
 			return (this.getHeuristic()  < shape.getHeuristic() ? -1 :
 				   (this.getHeuristic() == shape.getHeuristic() ?  0 : 1));

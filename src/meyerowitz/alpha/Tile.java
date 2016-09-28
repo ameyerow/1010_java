@@ -14,6 +14,8 @@ public class Tile
 	public static final Color yellow = new Color(255, 215, 0);
 	public static final Color purple = new Color(72, 61, 139);
 	public static final Color teal = new Color(87, 176, 168);
+	public static final Color turquois = new Color(113, 219, 212);
+	public static final Color darkgray = new Color(105, 105, 105);
 	
 	private boolean mFilled;		
 	public boolean getFilled() { return mFilled; }
