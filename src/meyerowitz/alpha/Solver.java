@@ -25,7 +25,7 @@ public class Solver {
 		// best location. Choose the board with the best board and place that shape.
 		do {
 			for(InternalShape shape: mShapes)
-				findOptimalPlacement(cloneBoard(boardClone), shape);
+				findOptimalPlacement(cloneBoard(boardClone), shape, mShapes, false);
 			
 			if(mShapes.size() != 1)
 				Collections.sort(mShapes);
@@ -45,7 +45,7 @@ public class Solver {
 		return bestMoves;
 	}
 	
-	private void findOptimalPlacement(int[][] boardClone, InternalShape shape) {
+	private void findOptimalPlacement(int[][] boardClone, InternalShape shape, ArrayList<InternalShape> shapes, boolean recursive) {
 		int bestHeuristic = Integer.MAX_VALUE;
 		int x = 0;
 		int y = 0;
@@ -57,6 +57,12 @@ public class Solver {
 						int[][] board = cloneBoard(boardClone);
 						board =	placeShape(board, shape, i, j);	
 						board = removeFullRowsAndColumns(board);
+						
+						for(InternalShape a : shapes) {
+							if(shape.getIndex() != a.getIndex()) {
+								
+							}
+						}
 						
 						// The best board has the lowest heuristic
 						int boardHeuristic = calculateHeuristic(board, shape);
@@ -230,8 +236,6 @@ public class Solver {
 					}
 				}
 		//Adds the total perimeter of the groupings to the groupingHeuristic
-		
-		
 		if(tileStatus == 0) {
 			int totalPerimeter = 0;
 			

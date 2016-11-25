@@ -9,6 +9,9 @@ import javax.swing.*;
 public class Game extends JPanel implements MouseListener {	
 	private static final long serialVersionUID = 7L;
 	
+	private final static int WIDTH = 355;
+	private final static int HEIGHT = 600;
+	private final static double SCALE = 2; 
 	private Tile[][] mBoard;
 	private Shape[] mShapes;
 	private Rectangle[][] mHitbox;
@@ -29,7 +32,7 @@ public class Game extends JPanel implements MouseListener {
 		mTries = -1;
 		mSolverColor = new Color(105, 105, 105);
 		
-		initiate();
+		init();
 		
 		Runnable runnable = new Runnable(){
 			@Override
@@ -41,7 +44,7 @@ public class Game extends JPanel implements MouseListener {
 		executor.scheduleAtFixedRate(runnable, 0, 33, TimeUnit.MILLISECONDS);	
 	}
 	
-	private void initiate()
+	private void init()
 	{
 		if(mScore > mHighScore)
 			mHighScore = mScore;
@@ -67,7 +70,7 @@ public class Game extends JPanel implements MouseListener {
 			for(int j = 0; j < 10; j++) {
 				int xOffset = offsetCoords(i, mBoard[i][j]);
 				int yOffset = offsetCoords(j, mBoard[i][j]) + 80;
-				mHitbox[i][j] = new Rectangle(xOffset, yOffset, mBoard[i][j].getSize(), mBoard[i][j].getSize());
+				mHitbox[i][j] = new Rectangle(scale(xOffset), scale(yOffset), mBoard[i][j].getSize(), mBoard[i][j].getSize());
 			}
 		
 		mShapes = new Shape[3];
@@ -143,25 +146,25 @@ public class Game extends JPanel implements MouseListener {
 	public void paint(Graphics g) {
 		super.paint(g);
 		g.setColor(new Color(250, 250, 255));
-		g.fillRect(0, 0, this.getSize().width, this.getSize().height);
+		g.fillRect(0, 0, scale(WIDTH), scale(HEIGHT));
 		
 		Graphics2D g2D = (Graphics2D) g;
 		g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2D.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
 		
 		int length = Integer.toString(mScore).length();
-		g2D.setFont(new Font("Abadi MT Condensed Light", Font.PLAIN, 50));
+		g2D.setFont(new Font("Abadi MT Condensed Light", Font.PLAIN, scale(50)));
 		g2D.setColor(Tile.blue);
-		g2D.drawString(Integer.toString(mScore), (this.getSize().width/4) - (14 * length) + 16, 80);
+		g2D.drawString(Integer.toString(mScore), scale((WIDTH/4) - (14 * length) + 16), scale(80));
 		
 		length = Integer.toString(mHighScore).length();
 		g2D.setColor(Tile.lime);
-		g2D.drawString(Integer.toString(mHighScore), (this.getSize().width/4)*3 - (14 * length) , 80);
+		g2D.drawString(Integer.toString(mHighScore), scale((WIDTH/4)*3 - (14 * length)) , scale(80));
 		
 		int average = mTries != 0 ? mTotalScore / mTries : 0;
 		g2D.setColor(Tile.blue);
-		g2D.setFont(new Font("Abadi MT Condensed Light", Font.PLAIN, 25));
-		g2D.drawString(Integer.toString(average), 20, this.getSize().height - 20);
+		g2D.setFont(new Font("Abadi MT Condensed Light", Font.PLAIN, scale(25)));
+		g2D.drawString(Integer.toString(average), scale(20), scale(HEIGHT) - scale(40));
 		
 		
 		paintSolverButton(g);
@@ -187,8 +190,8 @@ public class Game extends JPanel implements MouseListener {
 		g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2D.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
 		g2D.setColor(mSolverColor);
-		g2D.fillRoundRect(322, 27, 10, 25, 10, 10);
-		g2D.fillOval(322, 15, 10, 10);
+		g2D.fillRoundRect(scale(322), scale(27), scale(10), scale(25), scale(10), scale(10));
+		g2D.fillOval(scale(322), scale(15), scale(10), scale(10));
 	}
 	
 	private void paintTile(Graphics g, Tile tile, int x, int y) {
@@ -198,7 +201,7 @@ public class Game extends JPanel implements MouseListener {
 		int xOffset = offsetCoords(x, tile);
 		int yOffset = offsetCoords(y, tile) + 80;
 		g2D.setColor(tile.getColor());
-		g2D.fillRoundRect(xOffset, yOffset, tile.getSize(), tile.getSize(), 10, 10);	
+		g2D.fillRoundRect(scale(xOffset), scale(yOffset), scale(tile.getSize()), scale(tile.getSize()), scale(10), scale(10));	
 	}
 	
 	private void paintShape(Graphics g, Shape shape, int index) {
@@ -212,7 +215,7 @@ public class Game extends JPanel implements MouseListener {
 					int xOffset = offsetCoords(i, tiles[i][j]) + (115 * index);
 					int yOffset = offsetCoords(j, tiles[i][j]) + 430;
 					g2D.setColor(tiles[i][j].getColor());
-					g2D.fillRoundRect(xOffset, yOffset, tiles[i][j].getSize(), tiles[i][j].getSize(), 8, 8);
+					g2D.fillRoundRect(scale(xOffset), scale(yOffset), scale(tiles[i][j].getSize()), scale(tiles[i][j].getSize()), scale(8), scale(8));
 				}			
 	}
 	
@@ -224,12 +227,12 @@ public class Game extends JPanel implements MouseListener {
 		for(int i = 0; i < tiles.length; i++)
 			for(int j = 0; j < tiles.length; j++)
 				if(tiles[i][j] != null) {
-					int xOffset = (int) (offsetCoords(i, tiles[i][j]) + 
+					int xOffset = (int) (offsetCoordsLifted(i, tiles[i][j]) + 
 							(MouseInfo.getPointerInfo().getLocation().getX()) - this.getLocationOnScreen().getX()) - 10;
-					int yOffset = (int) (offsetCoords(j, tiles[i][j]) + 
+					int yOffset = (int) (offsetCoordsLifted(j, tiles[i][j]) + 
 							(MouseInfo.getPointerInfo().getLocation().getY()) - this.getLocationOnScreen().getY()) - 10;
 					g2D.setColor(tiles[i][j].getColor());
-					g2D.fillRoundRect(xOffset, yOffset, tiles[i][j].getSize(), tiles[i][j].getSize(), 10, 10);
+					g2D.fillRoundRect(xOffset, yOffset, scale(tiles[i][j].getSize()), scale(tiles[i][j].getSize()), scale(10), scale(10));
 				}			
 	}
 	
@@ -238,20 +241,20 @@ public class Game extends JPanel implements MouseListener {
 		g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2D.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
 		g2D.setColor(new Color(250, 250, 255, 150));
-		g2D.fillRect(0, 0, this.getSize().width, this.getSize().height);
+		g2D.fillRect(0, 0, scale(WIDTH), scale(HEIGHT));
 		g2D.setColor(Tile.lime);
-		g2D.fillRoundRect(100, 175, 150, 150, 30, 30);
+		g2D.fillRoundRect(scale(100), scale(175), scale(150), scale(150), scale(30), scale(30));
 		Color white = new Color(250, 250, 255);
 		g2D.setColor(white);
-		g2D.fillOval(138, 213, 74, 74);
+		g2D.fillOval(scale(138), scale(213), scale(74), scale(74));
 		g2D.setColor(Tile.lime);
-		g2D.fillOval(145, 220, 60, 60);
-		int[] xpoints = {141, 161, 170, 169, 131};
-		int[] ypoints = {278, 258, 257, 306, 305};
+		g2D.fillOval(scale(145), scale(220), scale(60), scale(60));
+		int[] xpoints = {scale(141), scale(161), scale(170), scale(169), scale(131)};
+		int[] ypoints = {scale(278), scale(258), scale(257), scale(306), scale(305)};
 		Polygon polygon = new Polygon(xpoints, ypoints, 5);
 		g2D.fillPolygon(polygon);
-		int[] xpoints2 = {161, 175, 175};
-		int[] ypoints2 = {283, 272, 294};
+		int[] xpoints2 = {scale(161), scale(175), scale(175)};
+		int[] ypoints2 = {scale(283), scale(272), scale(294)};
 		Polygon triangle = new Polygon(xpoints2, ypoints2, 3);
 		g2D.setColor(white);
 		g2D.fillPolygon(triangle);
@@ -261,6 +264,10 @@ public class Game extends JPanel implements MouseListener {
 		return arg * (tile.getSize() + tile.getTileOffset()) + tile.getEdgeOffset();
 	}
 
+	private int offsetCoordsLifted(int arg, Tile tile) {
+		return arg * (scale(tile.getSize()) + scale(tile.getTileOffset())) + scale(tile.getEdgeOffset());
+	}
+	
 	@Override
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
@@ -268,7 +275,7 @@ public class Game extends JPanel implements MouseListener {
 	public void mouseClicked(MouseEvent e) {
 		Point point = new Point(e.getX(), e.getY());
 		if(!mGameOver) {
-			Rectangle solverHitbox = new Rectangle(322, 15, 10, 37);
+			Rectangle solverHitbox = new Rectangle(scale(322), scale(15), scale(10), scale(37));
 			if(solverHitbox.contains(point)) {
 				Runnable runnable = new Runnable() {
 					@Override
@@ -319,7 +326,7 @@ public class Game extends JPanel implements MouseListener {
 							
 							if(!checkAnyPlaceable()) 
 								if(mSolverMode == 2) {
-									initiate();
+									init();
 								} else {
 									mGameOver = true;
 									mSolverMode = 0;
@@ -351,9 +358,9 @@ public class Game extends JPanel implements MouseListener {
 				}
 			}
 		} else {
-			Rectangle restartHitbox = new Rectangle(100, 175, 150, 150);
+			Rectangle restartHitbox = new Rectangle(scale(100), scale(175), scale(150), scale(150));
 			if(restartHitbox.contains(point)) {
-				initiate();
+				init();
 			}
 		}
 	}
@@ -432,11 +439,16 @@ public class Game extends JPanel implements MouseListener {
 		}
 	}
 	
+	public static int scale(int arg)
+	{
+		return (int)(arg * SCALE);
+	}
+	
 	public static void main(String[] args) {
 		JFrame game = new JFrame();
 		game.setTitle("1010!");
 		game.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		game.setSize(355, 600);
+		game.setSize(scale(WIDTH), scale(HEIGHT));
 		game.setResizable(false);
 		game.add(new Game());
 		game.setLocationRelativeTo(null);
