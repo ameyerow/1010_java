@@ -11,7 +11,7 @@ public class Game extends JPanel implements MouseListener {
 	
 	private final static int WIDTH = 355;
 	private final static int HEIGHT = 600;
-	private final static double SCALE = 2; 
+	private final static double SCALE = 1; 
 	private Tile[][] mBoard;
 	private Shape[] mShapes;
 	private Rectangle[][] mHitbox;
