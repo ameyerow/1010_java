@@ -164,7 +164,7 @@ public class Game extends JPanel implements MouseListener {
 		int average = mTries != 0 ? mTotalScore / mTries : 0;
 		g2D.setColor(Tile.blue);
 		g2D.setFont(new Font("Abadi MT Condensed Light", Font.PLAIN, scale(25)));
-		g2D.drawString(Integer.toString(average), scale(20), scale(HEIGHT) - scale(40));
+		g2D.drawString(Integer.toString(average), scale(20), scale(HEIGHT) - scale(50));
 		
 		
 		paintSolverButton(g);

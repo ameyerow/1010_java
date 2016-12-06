@@ -138,6 +138,7 @@ public class Solver {
 	private int calculateHeuristic(int[][] board, InternalShape shape) {
 		double filledWeight = 1;
 		double groupingEmptyWeight = 1;
+		double columnRowAverageWeight = 10;
 		//double groupingFilledWeight = 0;
 		double shapesPlaceableWeight = 100;
 		double shapesCurrentPlaceableWeight = 1000;
@@ -147,8 +148,45 @@ public class Solver {
 				+ calculateGrouping(board, 0) * groupingEmptyWeight				// Calculates grouping of empty tiles
 				//+ calculateGrouping(board, 1) * groupingFilledWeight	
 				+ calculateShapesNotPlaceable(board) * shapesPlaceableWeight
-			    + calculateCurrentShapesNotPlaceable(board, shape) * shapesCurrentPlaceableWeight);
+			    + calculateCurrentShapesNotPlaceable(board, shape) * shapesCurrentPlaceableWeight
+			    /*+ columnRowAverage(board) * columnRowAverageWeight*/);
 	}
+	
+	/*private int columnRowAverage(int[][] board) {
+		int r_average = 0;
+		int c_average = 0;
+		int r_num  = 0;
+		int c_num = 0;
+		int r_total = 0;
+		int c_total = 0;
+		
+		for(int i = 0; i < 10; i++) {
+			int c_filled = 0;
+			int r_filled = 0;
+			
+			for(int j = 0; j <10; j++) {
+				c_filled += board[i][j];
+				r_filled += board[j][i];
+			}
+			
+			if(c_filled != 0)  {
+				c_num++;
+				c_total += c_filled;
+			}
+			if(r_filled != 0) {
+				r_num++;
+				r_total += r_filled;
+			}
+		}
+		
+		r_average = r_num != 0 ? (int) (r_total / r_num) : 0;
+		c_average = c_num != 0 ? (int) (c_total / c_num) : 0;
+		
+		System.out.println("row average: " + r_average);
+		System.out.println("column average: " + c_average);
+		
+		return r_average - c_average;
+	}*/
 	
 	private int calculateGrouping(int[][] board, int tileStatus) {	
 		int groupingHeuristic = 0;
@@ -266,8 +304,7 @@ public class Solver {
 			if(a != shape)
 				if(!checkShapePlaceableAnywhere(board, a))
 					currentShapesNotPlaceable++;	
-		return currentShapesNotPlaceable;
-		
+		return currentShapesNotPlaceable;	
 	}
 	
 	private int calculateNumFilledTiles(int[][] board) {
